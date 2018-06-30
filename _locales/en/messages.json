@@ -1,0 +1,11 @@
+{
+    "manifest_description": {
+        "message": "Adds mouse gestures like Opera.\nAvailable on http or https pages."
+    },
+    "rightclick": {
+        "message": "right click"
+    },
+    "outofrange": {
+        "message": "out of range"
+    }
+}

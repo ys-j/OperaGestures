@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+	<meta charset=utf-8>
+	<title>Settings</title>
+	<link rel=stylesheet href=options.css>
+	<figure>
+		<svg width="320" height="320" viewBox="-8 -8 16 16">
+			<defs>
+				<radialGradient id="_g" cx="0" cy=".5" r="1">
+					<stop offset="0%" stop-color="#000" stop-opacity="1" />
+					<stop offset="100%" stop-opacity="0" />
+				</radialGradient>
+				<path id="_tl" fill="url(#_g)" />
+			</defs>
+			<use href="#_tl" transform="rotate(0)" />
+			<use href="#_tl" transform="rotate(90)" />
+			<use href="#_tl" transform="rotate(180)" />
+			<use href="#_tl" transform="rotate(270)" />
+			<circle id="_cc" cx="0" cy="0" r="2" fill="#f9f9fa" />
+			<circle cx="0" cy="0" r=".1" />
+		</svg>
+	</figure>
+	<form name=f>
+		<svg width="120" height="120" viewBox="0 0 16 16" font-size="2">
+			<marker id="_ms" viewbox="-1 -1 2 2">
+				<circle r="1" />
+			</marker>
+			<marker id="_me" markerWidth="6" viewBox="0 -3 8 6">
+				<path d="M0,-3v6L8,0z" />
+			</marker>
+			<path id="_ml" marker-start="url(#_ms)" marker-end="url(#_me)" fill="none" stroke="#000" stroke-width=".5" />
+			<text x="0" y="2">1</text>
+			<text x="0" y="14">2</text>
+		</svg>
+		<label><span data-i18n=options_input1>1st gesture</span>: <input name=mm1 type=number min=1> <span data-i18n=options_pxover>px and over</span></label>
+		<label><span data-i18n=options_input2>2nd gesture</span>: <input name=mm2 type=number min=1> <span data-i18n=options_pxover>px and over</span></label>
+		<label><span data-i18n=options_input3>Angle range</span>: <input name=ar type=number min=0 max=90> <span data-i18n=options_deg>deg</span></label>
+		<button><span data-i18n=options_save>Save</span></button>
+		<div><span data-i18n=options_output>Detected gesture</span>: <output name=lg>&nbsp;</output></div>
+	</form>
+	<table>
+		<caption data-i18n=options_tablecaption>List of Gestures</caption>
+		<tr>
+			<th><span data-i18n=left>left</span>
+			<td data-i18n=options_left_func>Go to previous page in history
+		</tr>
+		<tr>
+			<th><span data-i18n=right>right</span>
+			<td data-i18n=options_right_func>Go to next page in history
+		</tr>
+		<tr>
+			<th><span data-i18n=up>up</span>→<span data-i18n=left>left</span>
+			<td data-i18n=options_upleft_func>Go to parent directory
+		</tr>
+		<tr>
+			<th><span data-i18n=up>up</span>→<span data-i18n=down>down</span>
+			<td data-i18n=options_updown_func>Refresh page
+		</tr>
+		<tr>
+			<th><span data-i18n=up>up</span>
+			<td data-i18n=options_up_func>Stop loading
+		</tr>
+		<tr>
+			<th><span data-i18n=down>down</span>
+			<td>
+				<dl>
+					<dt data-i18n=options_wlink>w/ link
+					<dd data-i18n=options_down_link_func>Open link in a new tab
+					<dt data-i18n=options_wolink>w/o link
+					<dd data-i18n=options_down_func>Open a new tab
+				</dl>
+		</tr>
+		<tr>
+			<th><span data-i18n=down>down</span>→<span data-i18n=up>up</span>
+			<td>
+				<dl>
+					<dt data-i18n=options_wlink>w/ link
+					<dd data-i18n=options_downup_link_func>Open link in a new background tab
+					<dt data-i18n=options_wolink>w/o link
+					<dd data-i18n=options_downup_func>Open a copy in a background tab
+				</dl>
+		</tr>
+		<tr>
+			<th><span data-i18n=down>down</span>→<span data-i18n=right>right</span>
+			<td data-i18n=options_downright_func>Close current tab
+		</tr>
+	</table>
+	<script src=options.js></script>
+</html>

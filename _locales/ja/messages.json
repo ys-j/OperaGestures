@@ -1,0 +1,83 @@
+{
+    "manifest_description": {
+        "message": "Opera風のマウスジェスチャーを追加します。\nhttp://またはhttps://から始まるページで利用できます。"
+    },
+    "left": {
+        "message": "左"
+    },
+    "right": {
+        "message": "右"
+    },
+    "up": {
+        "message": "上"
+    },
+    "down": {
+        "message": "下"
+    },
+    "rightclick": {
+        "message": "右クリック"
+    },
+    "outofrange": {
+        "message": "範囲外"
+    },
+    "options_input1": {
+        "message": "ジェスチャー1"
+    },
+    "options_input2": {
+        "message": "ジェスチャー2"
+    },
+    "options_input3": {
+        "message": "有効角度"
+    },
+    "options_pxover": {
+        "message": "px以上"
+    },
+    "options_deg": {
+        "message": "°以内"
+    },
+    "options_save": {
+        "message": "保存"
+    },
+    "options_output": {
+        "message": "検知したジェスチャー"
+    },
+    "options_tablecaption": {
+        "message": "ジェスチャー一覧"
+    },
+    "options_wlink": {
+        "message": "リンク上"
+    },
+    "options_wolink": {
+        "message": "リンク以外"
+    },
+    "options_left_func": {
+        "message": "履歴の前ページへ戻る"
+    },
+    "options_right_func": {
+        "message": "履歴の次ページへ進む"
+    },
+    "options_upleft_func": {
+        "message": "親階層へ移動する"
+    },
+    "options_updown_func": {
+        "message": "ページを更新する"
+    },
+    "options_up_func": {
+        "message": "読み込みを中止する"
+    },
+    "options_down_func": {
+        "message": "新しいタブを開く"
+    },
+    "options_down_link_func": {
+        "message": "リンクを新しいタブに開く"
+    },
+    "options_downup_func": {
+        "message": "タブを複製する"
+    },
+    "options_downup_link_func": {
+        "message": "リンクをバックグラウンドの新しいタブに開く"
+    },
+    "options_downright_func": {
+        "message": "タブを閉じる"
+    }
+}
