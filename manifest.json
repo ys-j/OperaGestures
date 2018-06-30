@@ -3,7 +3,12 @@
 	"name": "Opera Gestures",
 	"version": "0.1",
 	"description": "__MSG_manifest_description__",
+	"developer": {
+		"name": "_y_s",
+		"url": "https://github.com/ys0115/OperaGestures"
+	},
 	"author": "_y_s",
+	"homepage_url": "https://github.com/ys0115/OperaGestures",
 	"default_locale": "en",
 	"permissions": ["storage"],
 	"icons": {
