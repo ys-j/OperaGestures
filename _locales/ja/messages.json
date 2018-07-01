@@ -1,6 +1,6 @@
 {
     "manifest_description": {
-        "message": "Opera風のマウスジェスチャーを追加します。\nhttp://またはhttps://から始まるページで利用できます。"
+        "message": "Opera 12のようなマウスジェスチャーを追加します。\nhttp://またはhttps://から始まるページで利用できます。"
     },
     "left": {
         "message": "左"
@@ -13,6 +13,9 @@
     },
     "down": {
         "message": "下"
+    },
+    "wheel": {
+        "message": "ホイール"
     },
     "rightclick": {
         "message": "右クリック"
@@ -28,6 +31,9 @@
     },
     "options_input3": {
         "message": "有効角度"
+    },
+    "options_input4": {
+        "message": "ホイールジェスチャー"
     },
     "options_pxover": {
         "message": "px以上"
@@ -77,7 +83,16 @@
     "options_downup_link_func": {
         "message": "リンクをバックグラウンドの新しいタブに開く"
     },
+    "options_wheel_func": {
+        "message": "アクティブなタブを左/右のタブに切り替える"
+    },
     "options_downright_func": {
         "message": "タブを閉じる"
+    },
+    "options_downleft_func": {
+        "message": "ウィンドウを最小化する"
+    },
+    "options_upright_func": {
+        "message": "ウィンドウを最大化する"
     }
 }

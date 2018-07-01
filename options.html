@@ -33,7 +33,8 @@
 	</svg>
 	<label><span data-i18n=options_input1>1st gesture</span>: <input name=mm1 type=number min=1> <span data-i18n=options_pxover>px and over</span></label>
 	<label><span data-i18n=options_input2>2nd gesture</span>: <input name=mm2 type=number min=1> <span data-i18n=options_pxover>px and over</span></label>
-	<label><span data-i18n=options_input3>Angle range</span>: <input name=ar type=number min=0 max=90> <span data-i18n=options_deg>deg</span></label>
+	<label><span data-i18n=options_input3>Angle range</span>: <input name=ar type=number min=1 max=90> <span data-i18n=options_deg>deg</span></label>
+	<label><span data-i18n=options_input4>Wheel gesture</span>: <input name=wm type=number min=1> <span data-i18n=options_px>px</span></label>
 	<button><span data-i18n=options_save>Save</span></button>
 	<div><span data-i18n=options_output>Detected gesture</span>: <output name=lg>&nbsp;</output></div>
 </form>
@@ -80,8 +81,20 @@
 			</dl>
 	</tr>
 	<tr>
+		<th><span data-i18n=wheel>wheel</span> (<span data-i18n=up>up</span>/<span data-i18n=down>down</span>)
+		<td data-i18n=options_wheel_func>Switch active tab to the left/right one
+	</tr>
+	<tr>
 		<th><span data-i18n=down>down</span>→<span data-i18n=right>right</span>
 		<td data-i18n=options_downright_func>Close current tab
+	</tr>
+	<tr>
+		<th><span data-i18n=down>down</span>→<span data-i18n=left>left</span>
+		<td data-i18n=options_downleft_func>Minimize window
+	</tr>
+	<tr>
+		<th><span data-i18n=up>up</span>→<span data-i18n=right>right</span>
+		<td data-i18n=options_upright_func>Maximize window
 	</tr>
 </table>
 <script src=options.js></script>

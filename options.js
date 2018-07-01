@@ -21,6 +21,7 @@
 		g.mm2 = f.mm2.value;
 		g.rad = f.ar.value / 360 * Math.PI;
 		g.tan = Math.tan(g.rad);
+		g.wm = f.wm.value;
 		let ccv = (g.mm1 / 20).toFixed(1);
 		cc.setAttribute('r', ccv);
 		let cx = (8 * Math.cos(g.rad)).toFixed(1);
@@ -30,9 +31,10 @@
 		ml.setAttribute('d', `M2,2v${(g.mm1/max*12-2).toFixed(1)}a2,2,0,0,0,2,2h${(g.mm2/max*12-2).toFixed(1)}`);
 	}
 	browser.storage.local.get('config').then(v => v.config).catch(e => {}).then(c => {
-		f.mm1.value = c ? c.mm1 : 32;
-		f.mm2.value = c ? c.mm2 : 16;
-		f.ar.value = c ? c.ar : 30;
+		f.mm1.value = c && c.mm1 || 32;
+		f.mm2.value = c && c.mm2 || 16;
+		f.ar.value = c && c.ar || 30;
+		f.wm.value = c && c.wm || 4;
 		f.mm1.onchange = update;
 		f.mm2.onchange = update;
 		f.ar.onchange = update;
@@ -48,6 +50,7 @@
 				mm1: f.mm1.value|0,
 				mm2: f.mm2.value|0,
 				ar: f.ar.value|0,
+				wm: f.wm.value|0,
 			},
 		});
 	}, false);
@@ -57,7 +60,7 @@
 	let gestures = [];
 
 	function checkstate(e) {
-		let diffX = e.pageX - startX, diffY = e.pageY - startY;
+		let diffX = e.screenX - startX, diffY = e.screenY - startY;
 		let absX = Math.abs(diffX), absY = Math.abs(diffY);
 		let min = gestures.length ? g.mm2 : g.mm1;
 
@@ -81,7 +84,7 @@
 				state = 'outofrange';
 			}
 			if (state) {
-				startX = e.pageX, startY = e.pageY;
+				startX = e.screenX, startY = e.screenY;
 				if (state !== gestures[gestures.length - 1]
 					&& state !== gestures[gestures.length - 2]
 				) {
@@ -90,25 +93,37 @@
 			}
 		}
 	}
+	
+	function onwheel(e) {
+		e.preventDefault();
+		if (startX < 0 || startY < 0) {
+			startX = e.screenX, startY = e.screenY;
+		}
+		startX += e.deltaX, startY += e.deltaY;
+		if (g.wm < Math.abs(startY - e.screenY)) {
+			startX = e.screenX, startY = e.screenY;
+			gestures = ['wheel'];
+		}
+	}
 
-	function mousedown(e) {
+	function onmousedown(e) {
 		gestures = [];
-		startX = e.pageX, startY = e.pageY;
+		startX = e.screenX, startY = e.screenY;
 		if (e.button === 2) {
 			window.addEventListener('mousemove', checkstate, { once: false });
+			window.addEventListener('wheel', onwheel, { once: false });
 			window.addEventListener('contextmenu', e => {
 				if (gestures.length) {
 					e.preventDefault();
 				}
 			}, { once: true });
-
 			window.addEventListener('mouseup', e => {
 				f.lg.value = gestures.map(v => browser.i18n.getMessage(v) || v).join('→') || browser.i18n.getMessage('rightclick');
 				window.removeEventListener('mousemove', checkstate);
-				return false;
+				window.removeEventListener('wheel', onwheel);
 			}, { once: true });
 		}
 	}
-
-	window.addEventListener('mousedown', mousedown, false);
+	
+	window.addEventListener('mousedown', onmousedown, false);
 })();
