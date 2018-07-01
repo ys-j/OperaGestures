@@ -53,7 +53,6 @@
 	}, false);
 
 	// Preview
-	let body = document.body;
 	let startX = 0, startY = 0;
 	let gestures = [];
 
@@ -96,20 +95,20 @@
 		gestures = [];
 		startX = e.pageX, startY = e.pageY;
 		if (e.button === 2) {
-			body.addEventListener('mousemove', checkstate, { once: false });
-			body.addEventListener('contextmenu', e => {
+			window.addEventListener('mousemove', checkstate, { once: false });
+			window.addEventListener('contextmenu', e => {
 				if (gestures.length) {
 					e.preventDefault();
 				}
 			}, { once: true });
 
-			body.addEventListener('mouseup', e => {
+			window.addEventListener('mouseup', e => {
 				f.lg.value = gestures.map(v => browser.i18n.getMessage(v) || v).join('→') || browser.i18n.getMessage('rightclick');
-				body.removeEventListener('mousemove', checkstate);
+				window.removeEventListener('mousemove', checkstate);
 				return false;
 			}, { once: true });
 		}
 	}
 
-	body.addEventListener('mousedown', mousedown, false);
+	window.addEventListener('mousedown', mousedown, false);
 })();

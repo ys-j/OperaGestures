@@ -15,7 +15,6 @@
 		g.tan = Math.tan(g.rad);
 	});
 
-	let body = document.body;
 	let startX = 0, startY = 0;
 	let gestures = [];
 	
@@ -85,25 +84,25 @@
 		let href = e.target.href;
 		
 		if (e.button === 2) {
-			body.addEventListener('mousemove', checkstate, { once: false });
-			body.addEventListener('contextmenu', e => {
+			window.addEventListener('mousemove', checkstate, { once: false });
+			window.addEventListener('contextmenu', e => {
 				if (gestures.length) {
 					e.preventDefault();
 				}
 			}, { once: true });
 
-			body.addEventListener('mouseup', e => {
+			window.addEventListener('mouseup', e => {
 				let gesture = gestures.join('-');
 				if (gesture in func) {
 					func[gesture](href);
 				} else if (gestures.length) {
 					console.log('No function is registered: ' + gesture);
 				}
-				body.removeEventListener('mousemove', checkstate);
+				window.removeEventListener('mousemove', checkstate);
 				return false;
 			}, { once: true });
 		}
 	}
 	
-	body.addEventListener('mousedown', mousedown, false);
+	window.addEventListener('mousedown', mousedown, false);
 })();
