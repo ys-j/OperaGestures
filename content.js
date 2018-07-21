@@ -1,11 +1,14 @@
 (function () {
 	'use strict';
+	// glocal vars
 	let g = {
 		mm1: 32,
 		mm2: 16,
 		rad: 30 / 360 * Math.PI,
 		wm: 4,
 	};
+
+	// load config
 	browser.storage.local.get('config').then(v => {
 		if (v.config) {
 			g.mm1 = v.config.mm1 || g.mm1;
@@ -17,74 +20,70 @@
 		g.tan = Math.tan(g.rad);
 	});
 
+	// main
 	let startX = -1, startY = -1;
-	let gestures = [];
+	let first = true;
 	let href;
 	
 	let func = {
-		'left': () => history.back(),
-		'right': () => history.forward(),
-		'up': () => window.stop(),
-		'down': url => {
-			let msg = { type: 'create', options: {} };
-			if (typeof url === 'string' && url.startsWith('http')) {
-				msg.options.url = url;
-			}
-			browser.runtime.sendMessage(msg);
+		'left': () => top.history.back(),
+		'right': () => top.history.forward(),
+		'up': () => top.stop(),
+		'up,left': () => { top.location.href = top.location.href.replace(/[^/]*$/, '') },
+		'up,down': () => top.location.reload(),
+		'enter': e => {
+			startX = e ? e.screenX : -1, startY = e ? e.screenY : -1;
+			window.addEventListener('wheel', onwheel, { once: false });
+			window.addEventListener('contextmenu', oncontextmenu, { once: true });
+			window.addEventListener('mouseup', onmouseup, { once: true });
 		},
-		'up-left': () => {
-			location.href = location.href.replace(/[^/]*$/, '');
-		},
-		'up-down': () => location.reload(),
-		'down-right': () => browser.runtime.sendMessage({ type: 'remove' }),
-		'down-up': url => {
-			let msg = { type: 'create', options: { active: false } };
-			if (typeof url === 'string' && url.startsWith('http')) {
-				msg.options.url = url;
-			} else {
-				msg.options.url = location.href;
-			}
-			browser.runtime.sendMessage(msg);
-		},
-		'down-left': () => browser.runtime.sendMessage({ type: 'window', options: { state: 'minimized' } }),
-		'up-right': () => browser.runtime.sendMessage({ type: 'window', options: { state: 'maximized' } }),
+		'leave': () => {
+			window.removeEventListener('mousemove', checkstate);
+			window.removeEventListener('wheel', onwheel);
+			window.removeEventListener('contextmenu', oncontextmenu);
+			window.removeEventListener('mouseup', onmouseup);
+		}
 	};
-
+	browser.runtime.onMessage.addListener(m => {
+		if (m.func in func)	{
+			func[m.func]();
+		}
+	});
+	
 	function checkstate(e) {
 		let diffX = e.screenX - startX, diffY = e.screenY - startY;
 		let absX = Math.abs(diffX), absY = Math.abs(diffY);
-		let min = gestures.length ? g.mm2 : g.mm1;
+		let min = first ? g.mm1 : g.mm2;
 
 		if (min < absX || min < absY) {			
-			let state;
-			if (absX > absY && g.tan > absY / absX) {
-				state = diffX < 0 ? 'left' : 'right';
-			} else if (absY > absX && g.tan > absX / absY) {
-				state = diffY < 0 ? 'up' : 'down';
-			} else if (gestures.length) {
-				switch (gestures[gestures.length - 1]) {
-					case 'left':
-					case 'right':
-					if (absY > absX) state = diffY < 0 ? 'up' : 'down';
-					break;
-					case 'up':
-					case 'down':
-					if (absX > absY) state = diffX < 0 ? 'left' : 'right';
+			let states;
+			if (absX > absY) {
+				if (g.tan > absY / absX) {
+					states = [diffX < 0 ? 'left' : 'right'];
+				} else {
+					states = [null, diffX < 0 ? 'left' : 'right'];
+				}
+			} else if (absY > absX) {
+				if (g.tan > absX / absY) {
+					states = [diffY < 0 ? 'up' : 'down'];
+				} else {
+					states = [null, diffY < 0 ? 'up' : 'down']
 				}
 			}
-			if (state) {
+			if (states) {
+				first = false;
 				startX = e.screenX, startY = e.screenY;
-				if (state !== gestures[gestures.length - 1]
-					&& state !== gestures[gestures.length - 2]
-				) {
-					gestures.push(state);
-				}
+				browser.runtime.sendMessage({ states: states });
 			}
 		}
 	}
 	
+	function resetDelta() {
+		startX = -1, startY = -1;
+	};
 	function onwheel(e) {
 		e.preventDefault();
+		clearTimeout(resetDelta);
 		if (startX < 0 || startY < 0) {
 			startX = e.screenX, startY = e.screenY;
 		}
@@ -92,55 +91,63 @@
 		let diffY = startY - e.screenY;
 		if (g.wm < Math.abs(diffY)) {
 			startX = e.screenX, startY = e.screenY;
-			gestures = ['wheel'];
 			browser.runtime.sendMessage({ type: 'wheel', direction: Math.sign(diffY) });
 		}
+		setTimeout(resetDelta, 100);
 	}
 
 	function oncontextmenu(e) {
-		if (gestures.length) {
+		if (!first || (startX !== e.screenX || startY !== e.screenY)) {
 			e.preventDefault();
 		}
 	}
 
 	function onmouseup(e) {
-		let gesture = gestures.join('-');
-		if (gesture in func) {
-			func[gesture](href);
+		if (e.button === 2) {
+			browser.runtime.sendMessage({ execute: true, url: href });
+			window.addEventListener('contextmenu', oncontextmenu, { once: true });
+			window.removeEventListener('mousemove', checkstate);
+			window.removeEventListener('wheel', onwheel);
 		}
-		window.removeEventListener('mousemove', checkstate);
-		window.removeEventListener('wheel', onwheel);
 		return false;
 	}
 
 	function onmousedown(e) {
-		gestures = [];
+		first = true;
 		startX = e.screenX, startY = e.screenY;
 		href = e.target.href;
 		if (e.button === 2) {
 			window.addEventListener('mousemove', checkstate, { once: false });
 			window.addEventListener('wheel', onwheel, { once: false });
-			window.addEventListener('contextmenu', oncontextmenu, { once: true });
 			window.addEventListener('mouseup', onmouseup, { once: true });
 		}
 	}
 	
-	window.addEventListener('mousedown', onmousedown, false);
+	window.addEventListener('mousedown', onmousedown, false);	
 
-	browser.runtime.onMessage.addListener(m => {
-		switch (m.message) {
-			case 'enter':
-				startX = -1, startY = -1;
-				window.addEventListener('wheel', onwheel, { once: false });
-				window.addEventListener('contextmenu', oncontextmenu, { once: true });
-				window.addEventListener('mouseup', onmouseup, { once: true });
-				break;
-			case 'leave':
-				window.removeEventListener('mousemove', checkstate);
-				window.removeEventListener('wheel', onwheel);
-				window.removeEventListener('contextmenu', oncontextmenu);
-				window.removeEventListener('mouseup', onmouseup);
-				break;
+	// for iframes (alpha)
+	let events = {
+		mouseup: new MouseEvent('mouseup'),
+	};
+	let mousedown2 = e => {
+		if (e.buttons === 2) func['enter'](e);
+	};
+	if (self === top) {
+		let iframes = document.getElementsByTagName('iframe');
+		for (let i = 0, l = iframes.length; i < l; i++) {
+			iframes[i].addEventListener('mouseover', func['leave']);
+			iframes[i].addEventListener('mouseout', mousedown2);
 		}
-	});
+		window.addEventListener('mouseup', e => {
+			for (let i = 0, l = iframes.length; i < l; i++) {
+				iframes[i].contentWindow.dispatchEvent(events.mouseup);
+			}
+		}, false);
+	} else {
+		window.addEventListener('mouseenter', mousedown2);
+		window.addEventListener('mouseleave', func['leave']);
+		window.addEventListener('mouseup', e => {
+			top.dispatchEvent(events.mouseup);
+		}, false);
+	}
 })();
