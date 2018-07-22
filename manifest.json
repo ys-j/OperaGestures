@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "Opera Gestures",
-	"version": "0.4",
+	"version": "0.41",
 	"description": "__MSG_manifest_description__",
 	"developer": {
 		"name": "_y_s",
@@ -22,7 +22,8 @@
 		{
 			"all_frames": true,
 			"matches": ["<all_urls>"],
-			"js": ["content.js"]
+			"js": ["content.js"],
+			"run_at": "document_start"
 		}
 	],
 	"options_ui": {

@@ -123,7 +123,7 @@
 		}
 	}
 	
-	window.addEventListener('mousedown', onmousedown, false);	
+	window.addEventListener('mousedown', onmousedown, false);
 
 	// for iframes (alpha)
 	let events = {
