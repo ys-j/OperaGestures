@@ -1,0 +1,32 @@
+{
+	"manifest_version": 2,
+	"name": "Opera Gestures",
+	"version": "0.4",
+	"description": "__MSG_manifest_description__",
+	"author": "_y_s",
+	"homepage_url": "https://github.com/ys0115/OperaGestures",
+	"default_locale": "en",
+	"permissions": ["storage"],
+	"icons": {
+		"48": "icon48.png",
+		"96": "icon96.png"
+	},
+	"background": {
+		"persistent": false,
+		"scripts": ["background.js"]
+	},
+	"content_scripts": [
+		{
+			"all_frames": true,
+			"js": ["content.js"],
+			"match_about_blank": true,
+			"matches": ["<all_urls>"],
+			"run_at": "document_start"
+		}
+	],
+	"content_security_policy": "default-src 'self'",
+	"options_ui": {
+		"open_in_tab": true,
+		"page": "options.html"
+	}
+}
