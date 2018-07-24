@@ -59,11 +59,11 @@
 	let href;
 	
 	let func = {
-		'left': () => top.history.back(),
-		'right': () => top.history.forward(),
-		'up': () => top.stop(),
-		'up,left': () => { top.location.href = top.location.href.replace(/[^/]*$/, '') },
-		'up,down': () => top.location.reload(),
+		'left': () => history.back(),
+		'right': () => history.forward(),
+		'up': () => window.stop(),
+		'up,left': () => { location.href = location.href.replace(/[^/]*$/, '') },
+		'up,down': () => location.reload(),
 		'enter': e => {
 			overlay.hidden = false;
 			startX = e ? e.screenX : -1, startY = e ? e.screenY : -1;
