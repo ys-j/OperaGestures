@@ -1,5 +1,38 @@
 (function () {
 	'use strict';
+	let extUrl = browser.extension.getURL('/');
+
+	// overlay (for frames)
+	let overlay;
+	let overlayId = extUrl.replace(/[/:-]+/g, '-') + 'overlay';
+	if (self === top) {
+		overlay = document.createElement('div');
+		overlay.id = overlayId;
+		overlay.hidden = true;
+		overlay.style.position = 'fixed';
+		overlay.style.height = '100%';
+		overlay.style.width = '100%';
+		overlay.style.left = 0;
+		overlay.style.top = 0;
+		overlay.style.zIndex = 0x7fffffff;
+		self.addEventListener('DOMContentLoaded', () => {
+			document.body.appendChild(overlay);
+		});
+	} else {
+		self.addEventListener('mousedown', e => {
+			if (e.button === 2) {
+				let closest = e.target.closest('[href]');
+				top.postMessage({
+					href: closest ? closest.href : null,
+					origin: extUrl,
+					screenX: e.screenX,
+					screenY: e.screenY,
+				}, '*');
+			}
+		}, false);
+		return; // break script
+	}
+
 	// glocal vars
 	let g = {
 		mm1: 32,
@@ -32,12 +65,14 @@
 		'up,left': () => { top.location.href = top.location.href.replace(/[^/]*$/, '') },
 		'up,down': () => top.location.reload(),
 		'enter': e => {
+			overlay.hidden = false;
 			startX = e ? e.screenX : -1, startY = e ? e.screenY : -1;
 			window.addEventListener('wheel', onwheel, { once: false });
 			window.addEventListener('contextmenu', oncontextmenu, { once: true });
 			window.addEventListener('mouseup', onmouseup, { once: true });
 		},
 		'leave': () => {
+			overlay.hidden = true;
 			window.removeEventListener('mousemove', checkstate);
 			window.removeEventListener('wheel', onwheel);
 			window.removeEventListener('contextmenu', oncontextmenu);
@@ -97,6 +132,7 @@
 	}
 
 	function oncontextmenu(e) {
+		overlay.hidden = true;
 		if (!first || (startX !== e.screenX || startY !== e.screenY)) {
 			e.preventDefault();
 		}
@@ -112,42 +148,27 @@
 		return false;
 	}
 
-	function onmousedown(e) {
-		first = true;
-		startX = e.screenX, startY = e.screenY;
-		href = e.target.href;
-		if (e.button === 2) {
+	window.addEventListener('message', e => {
+		if (e.data.origin === extUrl) {
+			overlay.hidden = false;
+			first = true;
+			startX = e.data.screenX, startY = e.data.screenY;
+			href = e.data.href;
 			window.addEventListener('mousemove', checkstate, { once: false });
 			window.addEventListener('wheel', onwheel, { once: false });
 			window.addEventListener('mouseup', onmouseup, { once: true });
 		}
-	}
+	}, false);
 	
-	window.addEventListener('mousedown', onmousedown, false);
-
-	// for iframes (alpha)
-	let events = {
-		mouseup: new MouseEvent('mouseup'),
-	};
-	let mousedown2 = e => {
-		if (e.buttons === 2) func['enter'](e);
-	};
-	if (self === top) {
-		let iframes = document.getElementsByTagName('iframe');
-		for (let i = 0, l = iframes.length; i < l; i++) {
-			iframes[i].addEventListener('mouseover', func['leave']);
-			iframes[i].addEventListener('mouseout', mousedown2);
+	window.addEventListener('mousedown', e => {
+		if (e.button === 2) {
+			let closest = e.target.closest('[href]');
+			window.postMessage({
+				href: closest ? closest.href : null,
+				origin: extUrl,
+				screenX: e.screenX,
+				screenY: e.screenY,
+			}, location.origin);
 		}
-		window.addEventListener('mouseup', e => {
-			for (let i = 0, l = iframes.length; i < l; i++) {
-				iframes[i].contentWindow.dispatchEvent(events.mouseup);
-			}
-		}, false);
-	} else {
-		window.addEventListener('mouseenter', mousedown2);
-		window.addEventListener('mouseleave', func['leave']);
-		window.addEventListener('mouseup', e => {
-			top.dispatchEvent(events.mouseup);
-		}, false);
-	}
+	}, false);
 })();
