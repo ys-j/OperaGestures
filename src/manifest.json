@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "Opera Gestures",
-	"version": "0.43",
+	"version": "0.44",
 	"description": "__MSG_manifest_description__",
 	"developer": {
 		"name": "_y_s",

@@ -1,30 +1,32 @@
 (function () {
 	'use strict';
-	let extUrl = browser.extension.getURL('/');
+	// global object
+	let global;
+	if (self !== top) {
+		global = top.wrappedJSObject.OperaGestures;
+	} else {
+		global = new window.Object()
+		wrappedJSObject.OperaGestures = global;
+		global.wrappedJSObject.url = browser.extension.getURL('/');
+		global.wrappedJSObject.first = true;
+		global.wrappedJSObject.startX = -1;
+		global.wrappedJSObject.startY = -1;
+	}
+
+	window.addEventListener('contextmenu', e => {
+		if (!global.first || (global.startX !== e.screenX || global.startY !== e.screenY)) {
+			e.preventDefault();
+		}
+	}, false);
 
 	// overlay (for frames)
-	let overlay;
-	let overlayId = extUrl.replace(/[/:-]+/g, '-') + 'overlay';
-	if (self === top) {
-		overlay = document.createElement('div');
-		overlay.id = overlayId;
-		overlay.hidden = true;
-		overlay.style.position = 'fixed';
-		overlay.style.height = '100%';
-		overlay.style.width = '100%';
-		overlay.style.left = 0;
-		overlay.style.top = 0;
-		overlay.style.zIndex = 0x7fffffff;
-		self.addEventListener('DOMContentLoaded', () => {
-			document.body.appendChild(overlay);
-		});
-	} else {
+	if (self !== top) {
 		self.addEventListener('mousedown', e => {
 			if (e.button === 2) {
 				let closest = e.target.closest('[href]');
 				top.postMessage({
 					href: closest ? closest.href : null,
-					origin: extUrl,
+					origin: global.url,
 					screenX: e.screenX,
 					screenY: e.screenY,
 				}, '*');
@@ -32,9 +34,21 @@
 		}, false);
 		return; // break script
 	}
+	let overlay = document.createElement('div');
+	overlay.id = global.url.replace(/[/:-]+/g, '-') + 'overlay';
+	overlay.hidden = true;
+	overlay.style.position = 'fixed';
+	overlay.style.height = '100%';
+	overlay.style.width = '100%';
+	overlay.style.left = 0;
+	overlay.style.top = 0;
+	overlay.style.zIndex = 0x7fffffff;
+	self.addEventListener('DOMContentLoaded', () => {
+		document.body.appendChild(overlay);
+	});
 
 	// glocal vars
-	let g = {
+	let vars = {
 		mm1: 32,
 		mm2: 16,
 		rad: 30 / 360 * Math.PI,
@@ -44,19 +58,18 @@
 	// load config
 	browser.storage.local.get('config').then(v => {
 		if (v.config) {
-			g.mm1 = v.config.mm1 || g.mm1;
-			g.mm2 = v.config.mm2 || g.mm2;
-			g.rad = v.config.ar / 360 * Math.PI || g.rad;
-			g.wm = v.config.wm || g.wm;
+			vars.mm1 = v.config.mm1 || vars.mm1;
+			vars.mm2 = v.config.mm2 || vars.mm2;
+			vars.rad = v.config.ar / 360 * Math.PI || vars.rad;
+			vars.wm = v.config.wm || vars.wm;
 		}
 	}).catch(e => {}).then(() => {
-		g.tan = Math.tan(g.rad);
+		vars.tan = Math.tan(vars.rad);
 	});
 
 	// main
-	let startX = -1, startY = -1;
-	let first = true;
 	let href;
+	let wheelTimer;
 	
 	let func = {
 		'left': () => history.back(),
@@ -66,16 +79,17 @@
 		'up,down': () => location.reload(),
 		'enter': e => {
 			overlay.hidden = false;
-			startX = e ? e.screenX : -1, startY = e ? e.screenY : -1;
+			global.wrappedJSObject.startX = e ? e.screenX : -1;
+			global.wrappedJSObject.startY = e ? e.screenY : -1;
 			window.addEventListener('wheel', onwheel, { once: false });
-			window.addEventListener('contextmenu', oncontextmenu, { once: true });
+			//window.addEventListener('contextmenu', oncontextmenu, { once: true });
 			window.addEventListener('mouseup', onmouseup, { once: true });
 		},
 		'leave': () => {
 			overlay.hidden = true;
 			window.removeEventListener('mousemove', checkstate);
 			window.removeEventListener('wheel', onwheel);
-			window.removeEventListener('contextmenu', oncontextmenu);
+			//window.removeEventListener('contextmenu', oncontextmenu);
 			window.removeEventListener('mouseup', onmouseup);
 		}
 	};
@@ -86,62 +100,59 @@
 	});
 	
 	function checkstate(e) {
-		let diffX = e.screenX - startX, diffY = e.screenY - startY;
+		let diffX = e.screenX - global.startX, diffY = e.screenY - global.startY;
 		let absX = Math.abs(diffX), absY = Math.abs(diffY);
-		let min = first ? g.mm1 : g.mm2;
+		let min = global.first ? vars.mm1 : vars.mm2;
 
 		if (min < absX || min < absY) {			
 			let states;
 			if (absX > absY) {
-				if (g.tan > absY / absX) {
+				if (vars.tan > absY / absX) {
 					states = [diffX < 0 ? 'left' : 'right'];
 				} else {
 					states = [null, diffX < 0 ? 'left' : 'right'];
 				}
 			} else if (absY > absX) {
-				if (g.tan > absX / absY) {
+				if (vars.tan > absX / absY) {
 					states = [diffY < 0 ? 'up' : 'down'];
 				} else {
 					states = [null, diffY < 0 ? 'up' : 'down']
 				}
 			}
 			if (states) {
-				first = false;
-				startX = e.screenX, startY = e.screenY;
+				global.wrappedJSObject.first = false;
+				global.wrappedJSObject.startX = e.screenX;
+				global.wrappedJSObject.startY = e.screenY;
 				browser.runtime.sendMessage({ states: states });
 			}
 		}
 	}
-	
-	function resetDelta() {
-		startX = -1, startY = -1;
-	};
 	function onwheel(e) {
 		e.preventDefault();
-		clearTimeout(resetDelta);
-		if (startX < 0 || startY < 0) {
-			startX = e.screenX, startY = e.screenY;
+		clearTimeout(wheelTimer);
+		if (global.startX < 0 || global.startY < 0) {
+			global.wrappedJSObject.startX = e.screenX;
+			global.wrappedJSObject.startY = e.screenY;
 		}
-		startX += e.deltaX, startY += e.deltaY;
-		let diffY = startY - e.screenY;
-		if (g.wm < Math.abs(diffY)) {
-			startX = e.screenX, startY = e.screenY;
+		global.wrappedJSObject.startX += e.deltaX;
+		global.wrappedJSObject.startY += e.deltaY;
+		let diffY = global.startY - e.screenY;
+		if (vars.wm < Math.abs(diffY)) {
+			global.wrappedJSObject.startX = e.screenX;
+			global.wrappedJSObject.startY = e.screenY;
 			browser.runtime.sendMessage({ type: 'wheel', direction: Math.sign(diffY) });
 		}
-		setTimeout(resetDelta, 100);
-	}
-
-	function oncontextmenu(e) {
-		overlay.hidden = true;
-		if (!first || (startX !== e.screenX || startY !== e.screenY)) {
-			e.preventDefault();
-		}
+		wheelTimer = setTimeout(() => {
+			global.wrappedJSObject.startX = -1;
+			global.wrappedJSObject.startY = -1;
+		}, 100);
 	}
 
 	function onmouseup(e) {
 		if (e.button === 2) {
+			overlay.hidden = true;
 			browser.runtime.sendMessage({ execute: true, url: href });
-			window.addEventListener('contextmenu', oncontextmenu, { once: true });
+			//window.addEventListener('contextmenu', oncontextmenu, { once: true });
 			window.removeEventListener('mousemove', checkstate);
 			window.removeEventListener('wheel', onwheel);
 		}
@@ -149,10 +160,11 @@
 	}
 
 	window.addEventListener('message', e => {
-		if (e.data.origin === extUrl) {
+		if (e.data.origin === global.url) {
 			overlay.hidden = false;
-			first = true;
-			startX = e.data.screenX, startY = e.data.screenY;
+			global.wrappedJSObject.first = true;
+			global.wrappedJSObject.startX = e.data.screenX;
+			global.wrappedJSObject.startY = e.data.screenY;
 			href = e.data.href;
 			window.addEventListener('mousemove', checkstate, { once: false });
 			window.addEventListener('wheel', onwheel, { once: false });
@@ -165,7 +177,7 @@
 			let closest = e.target.closest('[href]');
 			window.postMessage({
 				href: closest ? closest.href : null,
-				origin: extUrl,
+				origin: global.url,
 				screenX: e.screenX,
 				screenY: e.screenY,
 			}, location.origin);
