@@ -1,4 +1,3 @@
-var browser = browser || chrome;
 (function () {
 	'use strict';
 	Array.prototype.last = function (i) {
@@ -6,9 +5,9 @@ var browser = browser || chrome;
 	};
 
 	// reload discarded tabs
-	browser.tabs.query({ currentWindow: true, discarded: true }, tabs => {
+	chrome.tabs.query({ currentWindow: true, discarded: true }, tabs => {
 		for (let i = 0, l = tabs.length; i < l; i++) {
-			browser.tabs.reload(tabs[i].id);
+			chrome.tabs.reload(tabs[i].id);
 		}
 	});
 
@@ -16,7 +15,7 @@ var browser = browser || chrome;
 	let gestures = [];
 	let isUrl = url => typeof url === 'string' && url.startsWith('http');
 	let getCurrent = () => new Promise((resolve, reject) => {
-		browser.tabs.query({ active: true, currentWindow: true }, tabs => {
+		chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
 			if (tabs && tabs[0]) {
 				resolve(tabs[0])
 			} else {
@@ -25,16 +24,16 @@ var browser = browser || chrome;
 		});
 	});
 	let func = {
-		'down': url => browser.tabs.create(isUrl(url) ? { url: url } : {}),
-		'down,right': () => getCurrent().then(tab => browser.tabs.remove(tab.id)),
-		'down,up': url => browser.tabs.create(isUrl(url) ? { active: false, url: url } : { active: false }),
-		'down,left': () => browser.windows.getCurrent({}, window => browser.windows.update(window.id, { state: 'minimized' })),
-		'up,right': () => browser.windows.getCurrent({}, window => browser.windows.update(window.id, { state: window.state === 'normal' ? 'maximized' : 'normal' })),
+		'down': url => chrome.tabs.create(isUrl(url) ? { url: url } : {}),
+		'down,right': () => getCurrent().then(tab => chrome.tabs.remove(tab.id)),
+		'down,up': url => chrome.tabs.create(isUrl(url) ? { active: false, url: url } : { active: false }),
+		'down,left': () => chrome.windows.getCurrent({}, window => chrome.windows.update(window.id, { state: 'minimized' })),
+		'up,right': () => chrome.windows.getCurrent({}, window => chrome.windows.update(window.id, { state: window.state === 'normal' ? 'maximized' : 'normal' })),
 	};
 
-	browser.runtime.onMessage.addListener(m => {
+	chrome.runtime.onMessage.addListener(m => {
 		if ('direction' in m) {
-			browser.tabs.query({ currentWindow: true }, tabs => {
+			chrome.tabs.query({ currentWindow: true }, tabs => {
 				let currentIdx = Infinity, targetIdx = Infinity;
 				let tabsLen = tabs.length;
 				for (let i = tabsLen - 1; i >= 0; i--) {
@@ -51,9 +50,9 @@ var browser = browser || chrome;
 				}
 				let current = tabs[currentIdx], target = tabs[targetIdx];
 				if (target) {
-					browser.tabs.update(target.id, { active: true }, () => {
-						browser.tabs.sendMessage(current.id, { func: 'leave' });
-						browser.tabs.sendMessage(target.id, { func: 'enter' });
+					chrome.tabs.update(target.id, { active: true }, () => {
+						chrome.tabs.sendMessage(current.id, { func: 'leave' });
+						chrome.tabs.sendMessage(target.id, { func: 'enter' });
 					});
 				}
 			});
@@ -69,7 +68,7 @@ var browser = browser || chrome;
 				if (gesture in func) {
 					func[gesture](m.url);
 				} else {
-					getCurrent().then(tab => browser.tabs.sendMessage(tab.id, { func: gesture }));
+					getCurrent().then(tab => chrome.tabs.sendMessage(tab.id, { func: gesture }));
 				}
 				gestures = [];
 			}

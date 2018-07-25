@@ -1,4 +1,3 @@
-var browser = browser || chrome;
 (function () {
 	'use strict';
 	// glocal vars
@@ -10,7 +9,7 @@ var browser = browser || chrome;
 	};
 
 	// load config
-	browser.storage.local.get('config', v => {
+	chrome.storage.local.get('config', v => {
 		if (v.config) {
 			g.mm1 = v.config.mm1 || g.mm1;
 			g.mm2 = v.config.mm2 || g.mm2;
@@ -44,7 +43,7 @@ var browser = browser || chrome;
 			window.removeEventListener('mouseup', onmouseup);
 		}
 	};
-	browser.runtime.onMessage.addListener(m => {
+	chrome.runtime.onMessage.addListener(m => {
 		if (m.func in func)	{
 			func[m.func]();
 		}
@@ -73,7 +72,7 @@ var browser = browser || chrome;
 			if (states) {
 				first = false;
 				startX = e.screenX, startY = e.screenY;
-				browser.runtime.sendMessage(null, { states: states });
+				chrome.runtime.sendMessage(null, { states: states });
 			}
 		}
 	}
@@ -91,7 +90,7 @@ var browser = browser || chrome;
 		let diffY = startY - e.screenY;
 		if (g.wm < Math.abs(diffY)) {
 			startX = e.screenX, startY = e.screenY;
-			browser.runtime.sendMessage(null, { type: 'wheel', direction: Math.sign(diffY) });
+			chrome.runtime.sendMessage(null, { type: 'wheel', direction: Math.sign(diffY) });
 		}
 		setTimeout(resetDelta, 100);
 	}
@@ -104,7 +103,7 @@ var browser = browser || chrome;
 
 	function onmouseup(e) {
 		if (e.button === 2) {
-			browser.runtime.sendMessage(null, { execute: true, url: href });
+			chrome.runtime.sendMessage(null, { execute: true, url: href });
 			window.addEventListener('contextmenu', oncontextmenu, { once: true });
 			window.removeEventListener('mousemove', checkstate);
 			window.removeEventListener('wheel', onwheel);

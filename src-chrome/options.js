@@ -1,4 +1,3 @@
-var browser = browser || chrome;
 (function () {
 	'use strict';
 	let g = {};
@@ -9,10 +8,10 @@ var browser = browser || chrome;
 	let ml = svg[1].getElementById('_ml');
 
 	// load i18n
-	let lang = browser.i18n.getUILanguage();
+	let lang = chrome.i18n.getUILanguage();
 	document.documentElement.setAttribute('lang', lang === 'ja' ? 'ja' : 'en');
 	Array.from(document.querySelectorAll('[data-i18n]')).map(elem => {
-		let msg = browser.i18n.getMessage(elem.dataset.i18n);
+		let msg = chrome.i18n.getMessage(elem.dataset.i18n);
 		if (msg) elem.textContent = msg;
 	});
 
@@ -31,7 +30,7 @@ var browser = browser || chrome;
 		let max = Math.max(g.mm1, g.mm2);
 		ml.setAttribute('d', `M2,2v${(g.mm1/max*12-2).toFixed(1)}a2,2,0,0,0,2,2h${(g.mm2/max*12-2).toFixed(1)}`);
 	}
-	browser.storage.local.get('config', v => {
+	chrome.storage.local.get('config', v => {
 		let c = v.config;
 		f.mm1.value = c && c.mm1 || 32;
 		f.mm2.value = c && c.mm2 || 16;
@@ -46,8 +45,8 @@ var browser = browser || chrome;
 	// save config
 	f.addEventListener('submit', e => {
 		e.preventDefault();
-		browser.storage.local.set({
-			version: browser.runtime.getManifest().version,
+		chrome.storage.local.set({
+			version: chrome.runtime.getManifest().version,
 			config: {
 				mm1: f.mm1.value|0,
 				mm2: f.mm2.value|0,
@@ -120,7 +119,7 @@ var browser = browser || chrome;
 				}
 			}, { once: true });
 			window.addEventListener('mouseup', e => {
-				f.lg.value = gestures.map(v => browser.i18n.getMessage(v) || v).join('→') || browser.i18n.getMessage('rightclick');
+				f.lg.value = gestures.map(v => chrome.i18n.getMessage(v) || v).join('→') || chrome.i18n.getMessage('rightclick');
 				window.removeEventListener('mousemove', checkstate);
 				window.removeEventListener('wheel', onwheel);
 			}, { once: true });
