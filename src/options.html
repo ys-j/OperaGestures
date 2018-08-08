@@ -35,66 +35,117 @@
 	<label><span data-i18n=options_input2>2nd gesture</span>: <input name=mm2 type=number min=1> <span data-i18n=options_pxover>px and over</span></label>
 	<label><span data-i18n=options_input3>Angle range</span>: <input name=ar type=number min=1 max=90> <span data-i18n=options_deg>deg</span></label>
 	<label><span data-i18n=options_input4>Wheel gesture</span>: <input name=wm type=number min=1> <span data-i18n=options_px>px</span></label>
-	<button><span data-i18n=options_save>Save</span></button>
+	<button name=sb><span data-i18n=options_save>Save</span></button>
 	<div><span data-i18n=options_output>Detected gesture</span>: <output name=lg>&nbsp;</output></div>
 </form>
-<table>
-	<caption data-i18n=options_tablecaption>List of Gestures</caption>
-	<tr>
-		<th><span data-i18n=left>left</span>
-		<td data-i18n=options_left_func>Go to previous page in history
-	</tr>
-	<tr>
-		<th><span data-i18n=right>right</span>
-		<td data-i18n=options_right_func>Go to next page in history
-	</tr>
-	<tr>
-		<th><span data-i18n=up>up</span>→<span data-i18n=left>left</span>
-		<td data-i18n=options_upleft_func>Go to parent directory
-	</tr>
-	<tr>
-		<th><span data-i18n=up>up</span>→<span data-i18n=down>down</span>
-		<td data-i18n=options_updown_func>Refresh page
-	</tr>
-	<tr>
-		<th><span data-i18n=up>up</span>
-		<td data-i18n=options_up_func>Stop loading
-	</tr>
-	<tr>
-		<th><span data-i18n=down>down</span>
-		<td>
-			<dl>
-				<dt data-i18n=options_wlink>w/ link
-				<dd data-i18n=options_down_link_func>Open link in a new tab
-				<dt data-i18n=options_wolink>w/o link
-				<dd data-i18n=options_down_func>Open a new tab
-			</dl>
-	</tr>
-	<tr>
-		<th><span data-i18n=down>down</span>→<span data-i18n=up>up</span>
-		<td>
-			<dl>
-				<dt data-i18n=options_wlink>w/ link
-				<dd data-i18n=options_downup_link_func>Open link in a new background tab
-				<dt data-i18n=options_wolink>w/o link
-				<dd data-i18n=options_downup_func>Open a copy in a background tab
-			</dl>
-	</tr>
-	<tr>
-		<th><span data-i18n=wheel>wheel</span> (<span data-i18n=up>up</span>/<span data-i18n=down>down</span>)
-		<td data-i18n=options_wheel_func>Switch active tab to the left/right one
-	</tr>
-	<tr>
-		<th><span data-i18n=down>down</span>→<span data-i18n=right>right</span>
-		<td data-i18n=options_downright_func>Close current tab
-	</tr>
-	<tr>
-		<th><span data-i18n=down>down</span>→<span data-i18n=left>left</span>
-		<td data-i18n=options_downleft_func>Minimize window
-	</tr>
-	<tr>
-		<th><span data-i18n=up>up</span>→<span data-i18n=right>right</span>
-		<td data-i18n=options_upright_func>Maximize window
-	</tr>
-</table>
+<form name=g>
+	<table>
+		<caption data-i18n=options_tablecaption>List of Gestures (*: Extra Function)</caption>
+		<tr>
+			<th><span data-i18n=left>left</span>
+			<td>
+				<label>
+					<input name=l type=checkbox>
+					<span data-i18n=options_left_func>Go to previous page in history</span>
+				</label>
+		</tr>
+		<tr>
+			<th><span data-i18n=right>right</span>
+			<td>
+				<label>
+					<input name=r type=checkbox>
+					<span data-i18n=options_right_func>Go to next page in history</span>
+				</label>
+		</tr>
+		<tr>
+			<th><span data-i18n=up>up</span>→<span data-i18n=left>left</span>
+			<td>
+				<label>
+					<input name=ul type=checkbox>
+					<span data-i18n=options_upleft_func>Go to parent directory</span>
+				</label>
+		</tr>
+		<tr>
+			<th><span data-i18n=up>up</span>→<span data-i18n=down>down</span>
+			<td>
+				<label>
+					<input name=ud type=checkbox>
+					<span data-i18n=options_updown_func>Refresh page</span>
+				</label>
+		</tr>
+		<tr>
+			<th><span data-i18n=up>up</span>
+			<td>
+				<label>
+					<input name=u type=checkbox>
+					<span data-i18n=options_up_func>Stop loading</span>
+				</label>
+		</tr>
+		<tr>
+			<th><span data-i18n=down>down</span>
+			<td>
+				<label>
+					<input name=d type=checkbox>
+					<dl>
+						<dt data-i18n=options_wlink>w/ link
+						<dd data-i18n=options_down_link_func>Open link in a new tab
+						<dt data-i18n=options_wolink>w/o link
+						<dd data-i18n=options_down_func>Open a new tab
+				</label>
+		</tr>
+		<tr>
+			<th><span data-i18n=down>down</span>→<span data-i18n=up>up</span>
+				<td>
+					<label>
+						<input name=du type=checkbox>
+						<dl>
+							<dt data-i18n=options_wlink>w/ link
+							<dd data-i18n=options_downup_link_func>Open link in a new background tab
+							<dt data-i18n=options_wolink>w/o link
+							<dd data-i18n=options_downup_func>Open a copy in a background tab
+					</label>
+		</tr>
+		<tr>
+			<th><span data-i18n=wheel>wheel</span> (<span data-i18n=up>up</span>/<span data-i18n=down>down</span>)
+			<td>
+				<label>
+					<input name=w type=checkbox>
+					<span data-i18n=options_wheel_func>Switch active tab to the left/right one</span>
+				</label>
+		</tr>
+		<tr>
+			<th><span data-i18n=down>down</span>→<span data-i18n=right>right</span>
+			<td>
+				<label>
+					<input name=dr type=checkbox>
+					<span data-i18n=options_downright_func>Close current tab</span>
+				</label>
+		</tr>
+		<tr>
+			<th><span data-i18n=down>down</span>→<span data-i18n=left>left</span>
+			<td>
+				<label>
+					<input name=dl type=checkbox>
+					<span data-i18n=options_downleft_func>Minimize window</span>
+				</label>
+		</tr>
+		<tr>
+			<th><span data-i18n=up>up</span>→<span data-i18n=right>right</span>
+			<td>
+				<label>
+					<input name=ur type=checkbox>
+					<span data-i18n=options_upright_func>Maximize window</span>
+				</label>
+		</tr>
+		<tr>
+			<th><span data-i18n=right>right</span>→<span data-i18n=up>up</span>*
+			<td>
+				<label>
+					<input name=ru type=checkbox>
+					<span data-i18n=options_rightup_func>Restore recently closed tab/window</span>
+				</label>
+		</tr>
+	</table>
+	<button name=sb><span data-i18n=options_save>Save</span></button>
+</form>
 <script src=options.js></script>

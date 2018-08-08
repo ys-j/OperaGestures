@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "Opera Gestures",
-	"version": "0.44",
+	"version": "0.5",
 	"description": "__MSG_manifest_description__",
 	"developer": {
 		"name": "_y_s",
@@ -10,7 +10,7 @@
 	"author": "_y_s",
 	"homepage_url": "https://github.com/ys0115/OperaGestures",
 	"default_locale": "en",
-	"permissions": ["storage"],
+	"permissions": ["sessions", "storage"],
 	"icons": {
 		"48": "icon.svg",
 		"96": "icon.svg"

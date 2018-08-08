@@ -48,7 +48,7 @@
         "message": "検知したジェスチャー"
     },
     "options_tablecaption": {
-        "message": "ジェスチャー一覧"
+        "message": "ジェスチャー一覧（*: 追加機能）"
     },
     "options_wlink": {
         "message": "リンク上"
@@ -94,5 +94,8 @@
     },
     "options_upright_func": {
         "message": "ウィンドウを最大化する"
+    },
+    "options_rightup_func": {
+        "message": "最近閉じたタブ/ウィンドウを復元する"
     }
 }

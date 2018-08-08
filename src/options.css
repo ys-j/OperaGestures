@@ -1,6 +1,21 @@
+:root {
+	--color-blue50: #0a84ff;
+	--color-blue50-a30: #0a84ff4d;
+	--color-blue60: #0060df;
+	--color-blue70: #003eaa;
+	--color-blue80: #002275;
+	--color-grey20: #ededf0;
+	--color-grey40: #b1b1b3;
+	--color-grey90: #0c0c0d;
+	--color-grey90-a10: #0c0c0d1a;
+	--color-grey90-a20: #0c0c0d33;
+	--color-grey90-a30: #0c0c0d4d;
+	--color-white: #ffffff;
+}
 body {
 	align-items: center;
 	display: flex;
+	color: var(--color-grey90);
 	font: 400 15px/1.6 sans-serif;
 	flex-flow: row wrap;
 }
@@ -14,24 +29,32 @@ input[type="number"] {
 	width: 48px;
 }
 button {
-	background: #0060df;
+	background: var(--color-blue60);
 	border: 0;
 	border-radius: 4px;
-	color: #fff;
+	color: var(--color-white);
 	cursor: pointer;
 	font-size: 15px;
 	height: 48px;
 	margin: 8px 0;
 	padding: 0 16px;
 }
-button:hover {
-	background: #003eaa;
+button:disabled {
+	background: var(--color-blue60) !important;
+	cursor: default;
+	opacity: .4;
 }
-button:active {
-	background: #002275;
+button:hover,
+input[type="checkbox"]:checked:hover {
+	background-color: var(--color-blue70);
 }
-button:focus {
-	box-shadow: 0 0 0 1px #0a84ff inset, 0 0 0 1px #0a84ff, 0 0 0 4px rgba(10,132,255,.3);
+button:active,
+input[type="checkbox"]:checked:active {
+	background-color: var(--color-blue80);
+}
+button:focus,
+input[type="checkbox"]:focus {
+	box-shadow: 0 0 0 1px var(--color-blue50) inset, 0 0 0 1px var(--color-blue50), 0 0 0 4px var(--color-blue50-a30);
 }
 output {
 	display: block;
@@ -40,11 +63,36 @@ table {
 	border-collapse: collapse;
 }
 th, td {
-	border: 1px solid #b1b1b3;
+	border: 1px solid var(--color-grey40);
 	padding: 4px 8px;
 }
 th {
-	background: #ededf0;
+	background: var(--color-grey20);
+}
+td > label {
+	align-items: center;
+	display: flex;
+}
+input[type="checkbox"] {
+	-moz-appearance: none;
+	background: var(--color-grey90-a10);
+	border: 1px solid var(--color-grey90-a30);
+	border-radius: 2px;
+	height: 16px;
+	width: 16px;
+}
+input[type="checkbox"]:hover {
+	background: var(--color-grey90-a20);
+}
+input[type="checkbox"]:active {
+	background: var(--color-grey90-a30);
+}
+input[type="checkbox"]:checked {
+	background: var(--color-blue60) url("check.svg") no-repeat;
+	border: 0;
+}
+td > label > :last-child {
+	padding-left: 4px;
 }
 dl {
 	margin: 0;
