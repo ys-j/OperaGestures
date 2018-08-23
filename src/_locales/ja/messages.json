@@ -1,6 +1,6 @@
 {
     "manifest_description": {
-        "message": "Opera 12のようなマウスジェスチャーを追加します。\nhttp://またはhttps://から始まるページで利用できます。"
+        "message": "Opera 12のようなマウスジェスチャーを追加します。http://またはhttps://から始まるページで利用できます。"
     },
     "left": {
         "message": "左"
@@ -97,5 +97,8 @@
     },
     "options_rightup_func": {
         "message": "最近閉じたタブ/ウィンドウを復元する"
+    },
+    "notice_onstartup": {
+        "message": "インストールありがとうございます！\nクリックで設定画面を開きます。"
     }
 }

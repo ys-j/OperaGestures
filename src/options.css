@@ -39,11 +39,6 @@ button {
 	margin: 8px 0;
 	padding: 0 16px;
 }
-button:disabled {
-	background: var(--color-blue60) !important;
-	cursor: default;
-	opacity: .4;
-}
 button:hover,
 input[type="checkbox"]:checked:hover {
 	background-color: var(--color-blue70);

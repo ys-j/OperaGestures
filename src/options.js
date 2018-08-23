@@ -14,7 +14,9 @@
 	document.documentElement.setAttribute('lang', lang === 'ja' ? 'ja' : 'en');
 	Array.from(document.querySelectorAll('[data-i18n]')).map(elem => {
 		let msg = browser.i18n.getMessage(elem.dataset.i18n);
-		if (msg) elem.textContent = msg;
+		if (msg && msg !== '??') {
+			elem.textContent = msg;
+		}
 	});
 
 	// update svg
@@ -34,21 +36,31 @@
 		ml.setAttribute('d', `M2,2v${(vars.mm1/max*12-2).toFixed(1)}a2,2,0,0,0,2,2h${(vars.mm2/max*12-2).toFixed(1)}`);
 	}
 
-	// load config
-	browser.storage.local.get('config').then(v => v.config).catch(() => {}).then(c => {
-		c = c || { mm1: 32, mm2: 16, ar: 30, wm: 4 };
-		f.mm1.value = c.mm1;
-		f.mm2.value = c.mm2;
-		f.ar.value = c.ar;
-		f.wm.value = c.wm;
+	// load config and gesture
+	browser.storage.local.get(['config', 'gesture']).then(v => {
+		const INITIAL = {
+			config: { mm1: 32, mm2: 16, ar: 30, wm: 4 },
+			gesture: { basic: 2047, extra: 0 },
+		};
+		const STORAGE = v && v[0] || v;
+
+		let config = STORAGE.config || INITIAL.config;
+		f.mm1.value = config.mm1;
+		f.mm2.value = config.mm2;
+		f.ar.value = config.ar;
+		f.wm.value = config.wm;
 		f.mm1.onchange = update;
 		f.mm2.onchange = update;
 		f.ar.onchange = update;
 		update();
-		f.wm.onchange = e => {
-			f.sb.disabled = false;
-		};
-		f.sb.disabled = true;
+
+		let gesture = STORAGE.gesture || INITIAL.gesture;
+		for (let i = 0; i < 11; i++) {
+			gc[i].checked = gesture.basic & Math.pow(2, i);
+		}
+		for (let i = 11, l = gc.length; i < l; i++) {
+			gc[i].checked = gesture.extra & Math.pow(2, i - 11);
+		}
 	});
 
 	// save config
@@ -62,27 +74,10 @@
 				wm: f.wm.value | 0,
 			},
 		}).then(() => {
-			f.sb.blur();
-			f.sb.disabled = true;
+			browser.runtime.reload();
 		});
 		return false;
 	};
-
-	// load gesture
-	browser.storage.local.get('gesture').then(v => v.gesture).catch(() => {}).then(c => {
-		c = c || { basic: 2047, extra: 0 };
-		for (let i = 0, l = gc.length; i < l; i++) {
-			if (i < 11) {
-				gc[i].checked = c.basic & Math.pow(2, i);
-			} else {
-				gc[i].checked = c.extra & Math.pow(2, i - 11);
-			}
-			gc[i].onchange = () => {
-				g.sb.disabled = false;
-			};
-		}
-		g.sb.disabled = true;
-	});
 
 	// save gesture
 	g.onsubmit = () => {
@@ -91,8 +86,8 @@
 		for (let i = 0; i < 11; i++) {
 			basic += gc[i].checked ? Math.pow(2, i) : 0;
 		}
-		for (let i = 0, l = gc.length - 11; i < l; i++) {
-			extra += gc[i + 11].checked ? Math.pow(2, i) : 0;
+		for (let i = 11, l = gc.length; i < l; i++) {
+			extra += gc[i].checked ? Math.pow(2, i - 11) : 0;
 		}
 		browser.storage.local.set({
 			version: browser.runtime.getManifest().version,

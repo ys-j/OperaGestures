@@ -1,11 +1,14 @@
 {
     "manifest_description": {
-        "message": "Adds mouse gestures like Opera 12.\nAvailable on http or https pages."
+        "message": "Adds mouse gestures like Opera 12. Available on http or https pages."
     },
     "rightclick": {
         "message": "right click"
     },
     "outofrange": {
         "message": "out of range"
+    },
+    "notice_onstartup": {
+        "message": "Thank you for installing!\nClick to customize Opera Gestures."
     }
 }
