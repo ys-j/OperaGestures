@@ -59,9 +59,8 @@
 	});
 
 	browser.runtime.onConnect.addListener(p => {
-		let tab = p.sender.tab;
 		if (!blacklist.some(re => re.test(p.sender.url))) {
-			ports[tab.id] = p;
+			ports[p.sender.tab.id] = p;
 			p.onMessage.addListener(onmessage.bind(p));
 		}
 	});
