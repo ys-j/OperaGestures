@@ -1,32 +1,98 @@
-(function () {
+/* Copyright 2018 _y_s */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ (function () {
 	'use strict';
+	const EXT_MANIFEST = browser.runtime.getManifest();
+
 	let vars = {};
-	let f = document.forms.f;
-	let g = document.forms.g;
-	let gc = Array.from(g);
+	let s = document.forms.s;	// sensibility
+	let fb = document.forms.fb;	// functions (basic)
+	let fe = document.forms.fe;	// functions (extra)
+	let b = document.forms.b;	// blacklist (list)
+	let c = document.forms.c;	// blacklist (confirm)
+	let fbc = Array.from(fb);
+	let gesture = document.getElementById('gesture');
+	let matchedPattern = document.getElementById('matchedPattern');
 	let svg = document.getElementsByTagName('svg');
 	let cc = svg[0].getElementById('_cc');
 	let tl = svg[0].getElementById('_tl');
 	let ml = svg[1].getElementById('_ml');
 
-	// load i18n
-	let lang = browser.i18n.getUILanguage();
-	document.documentElement.setAttribute('lang', lang === 'ja' ? 'ja' : 'en');
-	Array.from(document.querySelectorAll('[data-i18n]')).map(elem => {
-		let msg = browser.i18n.getMessage(elem.dataset.i18n);
-		if (msg && msg !== '??') {
-			elem.textContent = msg;
+	// detect platform
+	(async function classifyHtml() {
+		let info = await browser.runtime.getPlatformInfo();
+		document.documentElement.setAttribute('data-os', info.os);
+	})();
+
+	// substitute i18n, extension info
+	(function subst_i18n() {
+		let lang = browser.i18n.getUILanguage();
+		document.documentElement.setAttribute('lang', lang === 'ja' ? 'ja' : 'en');
+		Array.from(document.querySelectorAll('[data-i18n]')).forEach(elem => {
+			let args = [];
+			for (let i = 1; i < 9; i++) {
+				let data = elem.dataset['i18n-$' + i];
+				if (data) {
+					args.push(data);
+				} else {
+					break;
+				}
+			}
+			let msg = browser.i18n.getMessage(elem.dataset.i18n, args);
+			if (msg && msg !== '??') {
+				elem.textContent = msg;
+			}
+		});
+		Array.from(document.querySelectorAll('[data-subst]')).forEach(elem => {
+			let msg = EXT_MANIFEST[elem.dataset.subst];
+			if (msg && typeof msg === 'string') {
+				elem.textContent = msg;
+			}
+		})
+	})();
+
+	// menu / section
+	function toggleNav() {
+		document.body.classList.toggle('nav-opened');
+	}
+	let btn = document.getElementById('menu');
+	let overlay = document.getElementById('overlay');
+	btn.onclick = toggleNav;
+	overlay.onclick = toggleNav;
+
+	function openSection() {
+		let hash = location.hash;
+		if (hash) {
+			document.body.className = hash.substr(1)  + '-opened';
 		}
+	}
+	window.onhashchange = openSection;
+	window.onload = openSection;
+
+	// message pop
+	let pops = document.getElementsByClassName('message');
+	Array.from(pops).forEach(pop => {
+		pop.addEventListener('transitionend', e => {
+			if (e.target !== document.activeElement) {
+				e.target.hidden = true;
+			}
+		}, { passive: true });
+		// for Firefox 52
+		let btns = pop.getElementsByTagName('button');
+		Array.from(btns).forEach(btn => {
+			btn.onmousedown = e => e.preventDefault();
+		})
 	});
 
 	// update svg
-	function update() {
-		f.sb.disabled = false;
-		vars.mm1 = f.mm1.value;
-		vars.mm2 = f.mm2.value;
-		vars.rad = f.ar.value / 360 * Math.PI;
+	function updateSVG() {
+		vars.mm1 = s.mm1.value;
+		vars.mm2 = s.mm2.value;
+		vars.rad = s.ar.value / 360 * Math.PI;
 		vars.tan = Math.tan(vars.rad);
-		vars.wm = f.wm.value;
+		vars.wm = s.wm.value;
 		let ccv = (vars.mm1 / 20).toFixed(1);
 		cc.setAttribute('r', ccv);
 		let cx = (8 * Math.cos(vars.rad)).toFixed(1);
@@ -36,72 +102,157 @@
 		ml.setAttribute('d', `M2,2v${(vars.mm1/max*12-2).toFixed(1)}a2,2,0,0,0,2,2h${(vars.mm2/max*12-2).toFixed(1)}`);
 	}
 
-	// load config and gesture
-	browser.storage.local.get(['config', 'gesture']).then(v => {
+	// update nested checkboxes
+	function updateNestedCheckboxes() {
+		let ul = fb.w.parentElement.nextElementSibling;
+		let disabled = !fb.w.checked;
+		ul.classList[disabled ? 'add' : 'remove']('disabled');
+		fe.w1.disabled = disabled;
+	}
+
+	// load config, gesture, blacklist
+	browser.storage.local.get(['config', 'gesture', 'blacklist']).then(STORAGE => {
 		const INITIAL = {
 			config: { mm1: 32, mm2: 16, ar: 30, wm: 4 },
 			gesture: { basic: 2047, extra: 0 },
+			blacklist: [],
 		};
-		const STORAGE = v && v[0] || v;
 
 		let config = STORAGE.config || INITIAL.config;
-		f.mm1.value = config.mm1;
-		f.mm2.value = config.mm2;
-		f.ar.value = config.ar;
-		f.wm.value = config.wm;
-		f.mm1.onchange = update;
-		f.mm2.onchange = update;
-		f.ar.onchange = update;
-		update();
+		s.mm1.value = config.mm1;
+		s.mm2.value = config.mm2;
+		s.ar.value = config.ar;
+		s.wm.value = config.wm;
+		s.mm1.onchange = updateSVG;
+		s.mm2.onchange = updateSVG;
+		s.ar.onchange = updateSVG;
+		updateSVG();
 
 		let gesture = STORAGE.gesture || INITIAL.gesture;
-		for (let i = 0; i < 11; i++) {
-			gc[i].checked = gesture.basic & Math.pow(2, i);
-		}
-		for (let i = 11, l = gc.length; i < l; i++) {
-			gc[i].checked = gesture.extra & Math.pow(2, i - 11);
-		}
+		fbc.forEach((elem, i) => {
+			elem.checked = gesture.basic & Math.pow(2, i);
+		});
+		fe.ru.checked = gesture.extra & 1;
+		fe.w1.checked = gesture.extra & 2;
+		fb.w.onchange = updateNestedCheckboxes;
+		updateNestedCheckboxes();
+
+		let blacklist = STORAGE.blacklist || INITIAL.blacklist;
+		b.ul.value = blacklist.join('\n');
 	});
 
-	// save config
-	f.onsubmit = () => {
-		browser.storage.local.set({
-			version: browser.runtime.getManifest().version,
-			config: {
-				mm1: f.mm1.value | 0,
-				mm2: f.mm2.value | 0,
-				ar: f.ar.value | 0,
-				wm: f.wm.value | 0,
-			},
-		}).then(() => {
+	// reload extenison
+	let reloadExtension;
+	if ('discard' in browser.tabs) {
+		reloadExtension = async () => {
+			let tabs = await browser.tabs.query({ discarded: false });
+			await browser.tabs.discard(tabs.map(tab => tab.id));
 			browser.runtime.reload();
+		};
+	} else {
+		// for Firefox 52
+		let dialog = document.getElementsByClassName('dialog')[0];
+		let msgboxes = dialog.getElementsByClassName('message');
+		Array.from(msgboxes).forEach(msgbox => {
+			let btns = msgbox.getElementsByTagName('button');
+			btns[0].onclick = async () => {
+				let windows = await browser.windows.getAll();
+				windows.forEach(window => {
+					browser.windows.remove(window.id);
+				});
+			};
+			btns[1].onclick = () => {
+				msgbox.addEventListener('transitionend', () => {
+					document.body.classList.remove('dialog-opened')
+					msgbox.hidden = true;
+				}, { once: true, passive: true });
+				msgbox.classList.remove('nofocus');
+				msgbox.blur();
+			};
 		});
+		reloadExtension = () => {
+			let msgbox = msgboxes[0];
+			document.body.classList.add('dialog-opened')
+			msgbox.hidden = false;
+			msgbox.onfocus = e => {
+				e.target.classList.add('nofocus');
+			};
+			msgbox.focus();
+		};
+	}
+
+	// save config
+	let sensibilitySect = document.getElementById('sensibility');
+	let popS = sensibilitySect.getElementsByClassName('success')[0];
+	popS.lastElementChild.onclick = reloadExtension;
+	s.onsubmit = () => {
+		if (s.checkValidity()) {
+			browser.storage.local.set({
+				version: EXT_MANIFEST.version,
+				config: {
+					mm1: s.mm1.value | 0,
+					mm2: s.mm2.value | 0,
+					ar: s.ar.value | 0,
+					wm: s.wm.value | 0,
+				},
+			}).then(() => {
+				popS.hidden = false;
+				popS.focus();
+			});
+		}
 		return false;
 	};
 
 	// save gesture
-	g.onsubmit = () => {
+	let functionsSect = document.getElementById('functions');
+	let popF = functionsSect.getElementsByClassName('success')[0];
+	popF.lastElementChild.onclick = reloadExtension;
+	fb.onsubmit = () => {
 		let basic = 0, extra = 0;
-		let name = gc.map(g => g.name);
-		for (let i = 0; i < 11; i++) {
-			basic += gc[i].checked ? Math.pow(2, i) : 0;
-		}
-		for (let i = 11, l = gc.length; i < l; i++) {
-			extra += gc[i].checked ? Math.pow(2, i - 11) : 0;
-		}
-		browser.storage.local.set({
-			version: browser.runtime.getManifest().version,
-			gesture: {
-				basic: basic,
-				extra: extra,
-				index: {
-					basic: name.slice(0, 11),
-					extra: name.slice(11),
-				},
-			},
-		}).then(() => {
-			browser.runtime.reload();
+		fbc.forEach((elem, i) => {
+			basic += elem.checked ? Math.pow(2, i) : 0;
 		});
+		extra += fe.ru.checked ? 1 : 0;
+		extra += fe.w1.checked ? 2 : 0;
+		browser.storage.local.set({
+			version: EXT_MANIFEST.version,
+			gesture: { basic: basic, extra: extra },
+		}).then(() => {
+			popF.hidden = false;
+			popF.focus();
+		});
+		return false;
+	};
+
+	// save blacklist
+	let blacklistSect = document.getElementById('blacklist');
+	let popB = blacklistSect.getElementsByClassName('success')[0];
+	popB.lastElementChild.onclick = reloadExtension;
+	b.onsubmit = () => {
+		let v = b.ul.value.replace(/\\\//g, '/').replace(/\\/g, '\\\\');
+		browser.storage.local.set({
+			version: EXT_MANIFEST.version,
+			blacklist: v ? v.split('\n') : [],
+		}).then(() => {
+			popB.hidden = false;
+			popB.focus();
+		});
+		return false;
+	};
+
+	// check blacklist
+	c.onsubmit = () => {
+		b.ul.value = b.ul.value.replace(/\\\//g, '/');
+		let rawList = (b.dl.value + '\n' + b.ul.value).split('\n').filter(s => s.length);
+		let reList = rawList.map(s => new RegExp(s));
+		let matched = reList.filter(re => re.test(c.url.value)).map(re => re.source.replace(/\\\//g, '/'));
+		if (matched.length) {
+			matchedPattern.value = matched.join('\n');
+		} else {
+			matchedPattern.value = browser.i18n.getMessage('none');
+		}
+		matchedPattern.parentElement.hidden = false;
+		matchedPattern.parentElement.focus();
 		return false;
 	};
 
@@ -162,18 +313,20 @@
 		if (e.button === 2) {
 			window.addEventListener('mousemove', checkstate, { once: false });
 			window.addEventListener('wheel', onwheel, { once: false });
-			window.addEventListener('contextmenu', e => {
-				if (gestures.length) {
-					e.preventDefault();
-				}
-			}, { once: true });
 			window.addEventListener('mouseup', e => {
-				f.lg.value = gestures.map(v => browser.i18n.getMessage(v) || v).join('→') || browser.i18n.getMessage('rightclick');
+				gesture.value = gestures.length ? gestures.map(v => browser.i18n.getMessage(v) || v).join('→') : browser.i18n.getMessage('rightclick');
+				gesture.parentElement.hidden = false;
+				gesture.parentElement.focus();
 				window.removeEventListener('mousemove', checkstate);
 				window.removeEventListener('wheel', onwheel);
 			}, { once: true });
 		}
 	}
-	
 	window.addEventListener('mousedown', onmousedown, false);
+
+	window.addEventListener('contextmenu', e => {
+		if (document.activeElement === gesture.parentElement) {
+			e.preventDefault();
+		}
+	}, false);
 })();

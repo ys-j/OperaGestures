@@ -1,4 +1,8 @@
-(function () {
+/* Copyright 2018 _y_s */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ (function () {
 	'use strict';
 	const EXT_URL = browser.extension.getURL('/');
 	let first = true;
@@ -26,6 +30,26 @@
 		return false;
 	}
 
+	// glocal vars
+	let vars = {};
+
+	// load config
+	browser.storage.local.get(['config']).then(v => {
+		const INITIAL = { config: { mm1: 32, mm2: 16, ar: 30, wm: 4 } };
+		let config = v.config;
+		if (config) {
+			vars = config;
+		} else {
+			vars = INITIAL.config;
+			browser.storage.local.set({
+				version: browser.runtime.getManifest().version,
+				config: vars,
+			});
+		}
+		vars.rad = vars.ar / 360 * Math.PI;
+		vars.tan = Math.tan(vars.rad);
+	});
+
 	// overlay
 	let overlay = document.createElement('div');
 	overlay.id = EXT_URL.replace(/[/:-]+/g, '-') + 'overlay';
@@ -40,26 +64,6 @@
 		document.body.appendChild(overlay);
 	});
 
-	// glocal vars
-	let vars = {};
-
-	// load config
-	browser.storage.local.get('config').then(v => {
-		const INITIAL = { config: { mm1: 32, mm2: 16, ar: 30, wm: 4 } };
-		let config = v && (v[0] || v).config;
-		if (config) {
-			vars = config;
-		} else {
-			vars = INITIAL.config;
-			browser.storage.local.set({
-				version: browser.runtime.getManifest().version,
-				config: vars,
-			});
-		}
-		vars.rad = vars.ar / 360 * Math.PI;
-		vars.tan = Math.tan(vars.rad);
-	});
-
 	// main
 	let port = browser.runtime.connect();
 	let href;
@@ -67,32 +71,6 @@
 	function initStartCoord() {
 		startX = -1, startY = -1;
 	}
-	
-	let func = {
-		'left': () => { history.back(); },
-		'right': () => { history.forward(); },
-		'up': () => { window.stop(); },
-		'up,left': () => { location.href = location.href.replace(/[^/]*$/, ''); },
-		'up,down': () => { location.reload(); },
-		'enter': e => {
-			overlay.hidden = false;
-			startX = e ? e.screenX : -1;
-			startY = e ? e.screenY : -1;
-			self.addEventListener('wheel', onwheel, { once: false });
-			self.addEventListener('mouseup', onmouseup, { once: true });
-		},
-		'leave': () => {
-			overlay.hidden = true;
-			self.removeEventListener('mousemove', checkstate);
-			self.removeEventListener('wheel', onwheel);
-			self.removeEventListener('mouseup', onmouseup);
-		}
-	};
-	port.onMessage.addListener(m => {
-		if (m.func in func)	{
-			func[m.func]();
-		}
-	});
 	
 	function checkstate(e) {
 		let diffX = e.screenX - startX, diffY = e.screenY - startY;
@@ -144,15 +122,41 @@
 		}
 		return false;
 	}
+
 	self.addEventListener('message', e => {
 		if (e.data.origin === EXT_URL) {
 			overlay.hidden = false;
 			first = true;
 			startX = e.data.screenX, startY = e.data.screenY;
 			href = e.data.href;
-			self.addEventListener('mousemove', checkstate, { once: false });
-			self.addEventListener('wheel', onwheel, { once: false });
-			self.addEventListener('mouseup', onmouseup, { once: true });
+			self.addEventListener('mousemove', checkstate, { once: false, passive: true });
+			self.addEventListener('wheel', onwheel, { once: false, passive: false });
+			self.addEventListener('mouseup', onmouseup, { once: true, passive: true });
 		}
 	}, false);
+	
+	let func = new Map([
+		['left', () => { history.back(); }],
+		['right', () => { history.forward(); }],
+		['up', () => { window.stop(); }],
+		['up,left', () => { location.href = location.href.replace(/[^/]*$/, ''); }],
+		['up,down', () => { location.reload(); }],
+		['enter', () => {
+			overlay.hidden = false;
+			startX = -1, startY = -1;
+			self.addEventListener('wheel', onwheel, { once: false, passive: false });
+			self.addEventListener('mouseup', onmouseup, { once: true, passive: true });
+		}],
+		['leave', () => {
+			overlay.hidden = true;
+			self.removeEventListener('mousemove', checkstate);
+			self.removeEventListener('wheel', onwheel);
+			self.removeEventListener('mouseup', onmouseup);
+		}],
+	]);
+	port.onMessage.addListener(m => {
+		if (func.has(m.func)) {
+			func.get(m.func)();
+		}
+	});
 })();

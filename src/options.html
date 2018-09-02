@@ -1,151 +1,262 @@
 <!DOCTYPE html>
 <meta charset=utf-8>
-<title>Settings</title>
+<title>Opera Gestures</title>
+<link rel=license href=http://mozilla.org/MPL/2.0/ >
 <link rel=stylesheet href=options.css>
-<figure>
-	<svg width="320" height="320" viewBox="-8 -8 16 16">
-		<defs>
-			<radialGradient id="_g" cx="0" cy=".5" r="1">
-				<stop offset="0%" stop-color="#000" stop-opacity="1" />
-				<stop offset="100%" stop-opacity="0" />
-			</radialGradient>
-			<path id="_tl" d="" fill="url(#_g)" />
-		</defs>
-		<use href="#_tl" transform="rotate(0)" />
-		<use href="#_tl" transform="rotate(90)" />
-		<use href="#_tl" transform="rotate(180)" />
-		<use href="#_tl" transform="rotate(270)" />
-		<circle id="_cc" cx="0" cy="0" r="2" fill="#f9f9fa" />
-		<circle cx="0" cy="0" r=".1" />
-	</svg>
-</figure>
-<form name=f>
-	<svg width="120" height="120" viewBox="0 0 16 16" font-size="2">
-		<marker id="_ms" viewbox="-1 -1 2 2">
-			<circle r="1" />
-		</marker>
-		<marker id="_me" markerWidth="6" viewBox="0 -3 8 6">
-			<path d="M0,-3v6L8,0z" />
-		</marker>
-		<path id="_ml" d="" marker-start="url(#_ms)" marker-end="url(#_me)" fill="none" stroke="#000" stroke-width=".5" />
-		<text x="0" y="2">1</text>
-		<text x="0" y="14">2</text>
-	</svg>
-	<label><span data-i18n=options_input1>1st gesture</span>: <input name=mm1 type=number min=1> <span data-i18n=options_pxover>px and over</span></label>
-	<label><span data-i18n=options_input2>2nd gesture</span>: <input name=mm2 type=number min=1> <span data-i18n=options_pxover>px and over</span></label>
-	<label><span data-i18n=options_input3>Angle range</span>: <input name=ar type=number min=1 max=90> <span data-i18n=options_deg>deg</span></label>
-	<label><span data-i18n=options_input4>Wheel gesture</span>: <input name=wm type=number min=1> <span data-i18n=options_px>px</span></label>
-	<button name=sb><span data-i18n=options_save>Save</span></button>
-	<div><span data-i18n=options_output>Detected gesture</span>: <output name=lg>&nbsp;</output></div>
-</form>
-<form name=g>
-	<table>
-		<caption data-i18n=options_tablecaption>List of Gestures (*: Extra Function)</caption>
-		<tr>
-			<th><span data-i18n=left>left</span>
-			<td>
-				<label>
-					<input name=l type=checkbox>
-					<span data-i18n=options_left_func>Go to previous page in history</span>
+<body class=about-opened>
+	<header>
+		<div class=center>
+			<a id=menu role=button data-i18n=menu>Menu</a>
+		</div>
+	</header>
+	<nav>
+		<h1><i><img alt=O src=icon.svg>pera Gestures</i></h1>
+		<ul role=tablist>
+			<li>
+				<h2 data-i18n=settings>Settings</h2>
+				<ul>
+					<li><a href=#sensibility data-i18n=sensibility>Sensibility</a>
+					<li><a href=#functions data-i18n=functions>Functions</a>
+					<li><a href=#blacklist data-i18n=blacklist>Blacklist</a>
+				</ul>
+			<li>
+				<h2 data-i18n=help>Help</h2>
+				<ul>
+					<li><a href=#about data-i18n=about>About</a>
+				</ul>
+		</ul>
+	</nav>
+	<main role=tablist>
+		<section id=sensibility role=tabpanel>
+			<h1 data-i18n=sensibility>Sensibility</h1>
+			<div class=message-container>
+				<div class="message inline" tabindex=-1 hidden>
+					<span data-i18n=options_output>Gestures detected</span>:
+					<output id=gesture role=status></output>
+				</div>
+			</div>
+			<div class=flex>
+				<figure role=status>
+					<svg width="320" height="320" viewBox="-8 -8 16 16">
+						<defs>
+							<radialGradient id="_g" cx="0" cy=".5" r="1">
+								<stop offset="0%" stop-color="#000" stop-opacity="1" />
+								<stop offset="100%" stop-opacity="0" />
+							</radialGradient>
+							<path id="_tl" d="" fill="url(#_g)" />
+						</defs>
+						<use href="#_tl" transform="rotate(0)" />
+						<use href="#_tl" transform="rotate(90)" />
+						<use href="#_tl" transform="rotate(180)" />
+						<use href="#_tl" transform="rotate(270)" />
+						<circle id="_cc" cx="0" cy="0" r="2" fill="var(--grey-10)" />
+						<circle cx="0" cy="0" r=".1" />
+					</svg>
+				</figure>
+				<form name=s>
+					<svg width="120" height="120" viewBox="0 0 16 16" font-size="2">
+						<marker id="_ms" viewbox="-1 -1 2 2">
+							<circle r="1" />
+						</marker>
+						<marker id="_me" markerWidth="6" viewBox="0 -3 8 6">
+							<path d="M0,-3v6L8,0z" />
+						</marker>
+						<path id="_ml" d="" marker-start="url(#_ms)" marker-end="url(#_me)" fill="none" stroke="#000" stroke-width=".5" />
+						<text x="0" y="2">1</text>
+						<text x="0" y="14">2</text>
+					</svg>
+					<label><span data-i18n=options_input1>1st gesture</span> <input name=mm1 type=number min=1> <span data-i18n=options_pxover>px and over</span></label>
+					<label><span data-i18n=options_input2>2nd gesture</span> <input name=mm2 type=number min=1> <span data-i18n=options_pxover>px and over</span></label>
+					<label><span data-i18n=options_input3>Angle range</span> <input name=ar type=number min=1 max=90> <span data-i18n=options_deg>deg</span></label>
+					<label><span data-i18n=options_input4>Wheel gesture</span> <input name=wm type=number min=1> <span data-i18n=options_px>px</span></label>
+					<button class="primary puffy" data-i18n=button_save>Save</button>
+					<div class="message warning runin">
+						<span data-i18n=options_required_restart>Require to restart add-on.</span>
+					</div>
+				</form>
+			</div>
+			<div class="message bottom success" tabindex=-1 hidden>
+				<span data-i18n=options_onsaved>Saved!</span>
+				<button type=button data-i18n=options_onsaved_restartaddon>Restart add-on</button>
+			</div>
+		</section>
+		<section id=functions role=tabpanel>
+			<h1 data-i18n=functions>Functions</h1>
+			<form name=fb>
+				<table>
+					<caption data-i18n=options_functable_caption>List of Functions (*: Extra)</caption>
+					<tr>
+						<th><span data-i18n=left>left</span>
+						<td>
+							<label>
+								<input name=l type=checkbox>
+								<span data-i18n=options_left_func>Go to previous page in history</span>
+							</label>
+					<tr>
+						<th><span data-i18n=right>right</span>
+						<td>
+							<label>
+								<input name=r type=checkbox>
+								<span data-i18n=options_right_func>Go to next page in history</span>
+							</label>
+					<tr>
+						<th><span data-i18n=up>up</span>→<span data-i18n=left>left</span>
+						<td>
+							<label>
+								<input name=ul type=checkbox>
+								<span data-i18n=options_upleft_func>Go to parent directory</span>
+							</label>
+					<tr>
+						<th><span data-i18n=up>up</span>→<span data-i18n=down>down</span>
+						<td>
+							<label>
+								<input name=ud type=checkbox>
+								<span data-i18n=options_updown_func>Refresh page</span>
+							</label>
+					<tr>
+						<th><span data-i18n=up>up</span>
+						<td>
+							<label>
+								<input name=u type=checkbox>
+								<span data-i18n=options_up_func>Stop loading</span>
+							</label>
+					<tr>
+						<th><span data-i18n=down>down</span>
+						<td>
+							<div>
+								<input id=checkD name=d type=checkbox>
+								<dl>
+									<dt data-i18n=options_wlink>w/ link
+									<dd><label for=checkD data-i18n=options_down_link_func>Open link in a new tab</label>
+									<dt data-i18n=options_wolink>w/o link
+									<dd><label for=checkD data-i18n=options_down_func>Open a new tab</label>
+								</dl>
+							</div>
+					<tr>
+						<th><span data-i18n=down>down</span>→<span data-i18n=up>up</span>
+						<td>
+							<div>
+								<input id=checkDU name=du type=checkbox>
+								<dl>
+									<dt data-i18n=options_wlink>w/ link
+									<dd><label for=checkDU data-i18n=options_downup_link_func>Open link in a new background tab</label>
+									<dt data-i18n=options_wolink>w/o link
+									<dd><label for=checkDU data-i18n=options_downup_func>Open a copy in a background tab</label>
+								</dl>
+							</div>
+					<tr>
+						<th><span data-i18n=wheel>wheel</span><br>(<span data-i18n=up>up</span>/<span data-i18n=down>down</span>)
+						<td>
+							<label>
+								<input name=w type=checkbox>
+								<span data-i18n=options_wheel_func>Switch active tab to the left/right one</span>
+							</label>
+							<ul class=disabled>
+								<li>
+									<label>
+										<input name=w1 type=checkbox form=fe disabled>
+										<span data-i18n=options_wheel_skip>Skip a tab that gestures don't work</span>
+									</label>
+									<div class="message warning">
+										<span data-i18n=options_wheel_skip_warning>Cannot skip a tab that is discarded or not yet loaded.</span>
+									</div>
+							</ul>
+					<tr>
+						<th><span data-i18n=down>down</span>→<span data-i18n=right>right</span>
+						<td>
+							<label>
+								<input name=dr type=checkbox>
+								<span data-i18n=options_downright_func>Close current tab</span>
+							</label>
+					<tr>
+						<th><span data-i18n=down>down</span>→<span data-i18n=left>left</span>
+						<td>
+							<label>
+								<input name=dl type=checkbox>
+								<span data-i18n=options_downleft_func>Minimize window</span>
+							</label>
+					<tr>
+						<th><span data-i18n=up>up</span>→<span data-i18n=right>right</span>
+						<td>
+							<label>
+								<input name=ur type=checkbox>
+								<span data-i18n=options_upright_func>Maximize window</span>
+							</label>
+					<tr>
+						<th><span data-i18n=right>right</span>→<span data-i18n=up>up</span>*
+						<td>
+							<label>
+								<input name=ru type=checkbox form=fe>
+								<span data-i18n=options_rightup_func>Restore recently closed tab/window</span>
+							</label>
+				</table>
+				<button class="primary puffy" data-i18n=button_save>Save</button>
+				<div class="message warning runin">
+					<span data-i18n=options_required_restart>Require to restart add-on.</span>
+				</div>
+			</form>
+			<form id=fe name=fe></form>
+			<div class="message bottom success" tabindex=-1 hidden>
+				<span data-i18n=options_onsaved>Saved!</span>
+				<button type=button data-i18n=options_onsaved_restartaddon>Restart add-on</button>
+			</div>
+		</section>
+		<section id=blacklist role=tabpanel>
+			<h1 data-i18n=blacklist>Blacklist</h1>
+			<p><span data-i18n=options_blacklist_description>Write in regular expression.</span> (<a href=https://developer.mozilla.org/docs/Web/JavaScript/Guide/Regular_Expressions#Writing_a_Regular_Expression_Pattern target=_blank>MDN</a>)</p>
+			<form name=b>
+				<label data-i18n=options_defaultblacklist>Default Blacklist (Not editable)</label>
+				<textarea disabled name=dl lang=en rows=5>^(?:about|chrome|file|jar|moz-extension|resource|view-source):&#xa;\.(?:pdf|svg)$&#xa;^https?://addons\.mozilla\.org/&#xa;^https?://testpilot\.firefox\.com/</textarea>
+				<label for=userlist data-i18n=options_userblacklist>User Blacklist</label>
+				<textarea id=userlist name=ul lang=en spellcheck=false></textarea>
+				<button class="primary puffy" data-i18n=button_save>Save</button>
+				<div class="message warning runin">
+					<span data-i18n=options_required_restart>Require to restart add-on.</span>
+				</div>
+			</form>
+			<div class="message bottom success" tabindex=-1 hidden>
+				<span data-i18n=options_onsaved>Saved!</span>
+				<button type=button data-i18n=options_onsaved_restartaddon>Restart add-on</button>
+			</div>
+			<form class=flex name=c>
+				<label class=flex-max>
+					<span data-i18n=options_confirm_url>Confirm if URL matches blacklist</span>
+					<input type=url name=url placeholder=http://example.com/ required>
 				</label>
-		</tr>
-		<tr>
-			<th><span data-i18n=right>right</span>
-			<td>
-				<label>
-					<input name=r type=checkbox>
-					<span data-i18n=options_right_func>Go to next page in history</span>
-				</label>
-		</tr>
-		<tr>
-			<th><span data-i18n=up>up</span>→<span data-i18n=left>left</span>
-			<td>
-				<label>
-					<input name=ul type=checkbox>
-					<span data-i18n=options_upleft_func>Go to parent directory</span>
-				</label>
-		</tr>
-		<tr>
-			<th><span data-i18n=up>up</span>→<span data-i18n=down>down</span>
-			<td>
-				<label>
-					<input name=ud type=checkbox>
-					<span data-i18n=options_updown_func>Refresh page</span>
-				</label>
-		</tr>
-		<tr>
-			<th><span data-i18n=up>up</span>
-			<td>
-				<label>
-					<input name=u type=checkbox>
-					<span data-i18n=options_up_func>Stop loading</span>
-				</label>
-		</tr>
-		<tr>
-			<th><span data-i18n=down>down</span>
-			<td>
-				<label>
-					<input name=d type=checkbox>
-					<dl>
-						<dt data-i18n=options_wlink>w/ link
-						<dd data-i18n=options_down_link_func>Open link in a new tab
-						<dt data-i18n=options_wolink>w/o link
-						<dd data-i18n=options_down_func>Open a new tab
-				</label>
-		</tr>
-		<tr>
-			<th><span data-i18n=down>down</span>→<span data-i18n=up>up</span>
-				<td>
-					<label>
-						<input name=du type=checkbox>
-						<dl>
-							<dt data-i18n=options_wlink>w/ link
-							<dd data-i18n=options_downup_link_func>Open link in a new background tab
-							<dt data-i18n=options_wolink>w/o link
-							<dd data-i18n=options_downup_func>Open a copy in a background tab
-					</label>
-		</tr>
-		<tr>
-			<th><span data-i18n=wheel>wheel</span> (<span data-i18n=up>up</span>/<span data-i18n=down>down</span>)
-			<td>
-				<label>
-					<input name=w type=checkbox>
-					<span data-i18n=options_wheel_func>Switch active tab to the left/right one</span>
-				</label>
-		</tr>
-		<tr>
-			<th><span data-i18n=down>down</span>→<span data-i18n=right>right</span>
-			<td>
-				<label>
-					<input name=dr type=checkbox>
-					<span data-i18n=options_downright_func>Close current tab</span>
-				</label>
-		</tr>
-		<tr>
-			<th><span data-i18n=down>down</span>→<span data-i18n=left>left</span>
-			<td>
-				<label>
-					<input name=dl type=checkbox>
-					<span data-i18n=options_downleft_func>Minimize window</span>
-				</label>
-		</tr>
-		<tr>
-			<th><span data-i18n=up>up</span>→<span data-i18n=right>right</span>
-			<td>
-				<label>
-					<input name=ur type=checkbox>
-					<span data-i18n=options_upright_func>Maximize window</span>
-				</label>
-		</tr>
-		<tr>
-			<th><span data-i18n=right>right</span>→<span data-i18n=up>up</span>*
-			<td>
-				<label>
-					<input name=ru type=checkbox>
-					<span data-i18n=options_rightup_func>Restore recently closed tab/window</span>
-				</label>
-		</tr>
-	</table>
-	<button name=sb><span data-i18n=options_save>Save</span></button>
-</form>
-<script src=options.js></script>
+				<button class=flex-min data-i18n=button_confirm>Confirm</button>
+			</form>
+			<div class=message-container>
+				<div class="message inline" tabindex=-1 hidden>
+					<span data-i18n=options_matched_pattern>Matched patterns</span>:
+					<output id=matchedPattern role=status></output>
+				</div>
+			</div>
+		</section>
+		<section id=about>
+			<h1>Thank you for using <i><img alt=O src=icon.svg>pera Gestures</i>!</h1>
+			<p>
+				<i data-subst=name></i> v<span data-subst=version></span>
+			</p>
+			<ul>
+				<li><a href=https://addons.mozilla.org/firefox/addon/opera-gestures/ target=_blank>AMO</a> - <span data-i18n=options_support_AMO>Rating and review</span>
+				<li><a href=https://github.com/ys0115/OperaGestures target=_blank>GitHub</a> - <span data-i18n=options_support_GitHub>Request and bug report</span>
+			</ul>
+			<p>
+				<small>This page design is based on <a href=https://design.firefox.com/photon/ target=_blank>Photon Design System</a> by Mozilla.</small>
+			</p>
+			<p>
+				<small>&copy; 2018 _y_s</small><br>
+				<small>This add-on is licensed under the <a href=http://mozilla.org/MPL/2.0/ target=_blank>Mozilla Public License, version 2.0</a>.</small>
+			</p>
+		</section>
+	</main>
+	<div id=overlay></div>
+	<div class=dialog>
+		<div class="message inline warning" tabindex=-1 hidden>
+			<span data-i18n="options_warning_restartaddon">Cannot reload the add-on automatically on your browser version.&#xa;Please restart the browser manually to apply modification.</span>
+			<button type=button data-i18n=button_closebrowser>Close browser</button>
+			<button class=close></button>
+		</div>
+	</div>
+	<script src=options.js></script>
+</body>
