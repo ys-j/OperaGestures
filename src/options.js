@@ -229,10 +229,10 @@
 	let popB = blacklistSect.getElementsByClassName('success')[0];
 	popB.lastElementChild.onclick = reloadExtension;
 	b.onsubmit = () => {
-		let v = b.ul.value.replace(/\\\//g, '/').replace(/\\/g, '\\\\');
+		let v = b.ul.value.replace(/\\\//g, '/');
 		browser.storage.local.set({
 			version: EXT_MANIFEST.version,
-			blacklist: v ? v.split('\n') : [],
+			blacklist: v ? v.split('\n').filter(s => s.length) : [],
 		}).then(() => {
 			popB.hidden = false;
 			popB.focus();
