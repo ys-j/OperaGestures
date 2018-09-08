@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "Opera Gestures",
-	"version": "0.61",
+	"version": "0.7a1",
 	"applications": {
 		"gecko": {
 			"id": "{57466e58-d98e-457c-8b93-0b9bb6f3e0b0}",

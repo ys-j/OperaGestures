@@ -107,9 +107,11 @@ html, body {
 }
 [data-os="android"]:root, [data-os="cros"]:root {
 	--sansserif: "Roboto", sans-serif;
-	--title-20: 400 20sp var(--sansserif);
-	--body-20: 400 15sp var(--sansserif);
-	--body-10: 400 12sp var(--sansserif);
+	--display-20: 200 30pt var(--sansserif);	/* unofficial */
+	--title-30: 300 22pt var(--sansserif);	/* unofficial */
+	--title-20: 400 20pt var(--sansserif);
+	--body-20: 400 15pt var(--sansserif);
+	--body-10: 400 12pt var(--sansserif);
 }
 
 /* Body */
@@ -145,7 +147,7 @@ a:focus {
 }
 
 /* Buttons, Checkboxes, Input Fields */
-button:disabled, input:disabled {
+:disabled {
 	opacity: .4;
 }
 button {
@@ -197,6 +199,7 @@ input[type="checkbox"] {
 	-moz-appearance: none;
 	background: var(--grey-90-a10);
 	height: 16px;
+	min-width: 16px;
 	width: 16px;
 }
 button:focus,
@@ -221,6 +224,19 @@ button.primary:active,
 input[type="checkbox"]:checked:active {
 	background-color: var(--blue-80);
 }
+input[type="checkbox"] + * {
+	padding-left: 4px;
+}
+label {
+	align-items: center;
+	display: inline-flex;
+}
+.nest-parent ~ .nest-child {
+	border: 0;
+	margin: 0;
+	padding: 0;
+	padding-left: 32px;
+}
 
 /* Message Bars */
 .message-container {
@@ -234,8 +250,9 @@ input[type="checkbox"]:checked:active {
 	color: var(--grey-90);
 	cursor: default;
 	display: flex;
-	flex-flow: row nowrap;
+	flex-flow: row wrap;
 	font-size: 13px;
+	max-width: 100%;
 	min-height: 32px;
 	padding: 4px 4px 4px 28px;
 	position: relative;
@@ -246,6 +263,9 @@ input[type="checkbox"]:checked:active {
 	display: inline-flex;
 	margin: 4px;
 	z-index: 0;
+}
+.message:focus-within {
+	outline: none;
 }
 .message.inline {
 	display: inline-flex;
@@ -269,7 +289,7 @@ input[type="checkbox"]:checked:active {
 	margin: 0 4px;
 }
 .message > span {
-	flex: 1 0 auto;
+	flex: 1 0 0;
 }
 .message.success {
 	background: var(--green-50) var(--icon-check-green) no-repeat 8px center/16px;
@@ -334,14 +354,19 @@ body > * {
 .flex {
 	align-items: stretch;
 	display: flex;
-	flex-flow: row nowrap;
+	flex-flow: row wrap;
+}
+.flex > :not(:last-child) {
+	margin-right: 16px;
 }
 .dialog {
 	background: var(--grey-90-a40);
 	display: none;
 	height: 100%;
 	position: fixed;
+	opacity: 0;
 	top: 0;
+	transition: opacity .3s var(--ease);
 	width: 100%;
 	z-index: 3;
 }
@@ -349,6 +374,10 @@ body > * {
 	align-items: center;
 	display: flex;
 	justify-content: center;
+	opacity: 1;
+}
+.dialog-opened .dialog:not(:focus-within) {
+	opacity: 0;
 }
 a:not([href]), a[href^="#"] {
 	color: var(--grey-90);
@@ -367,29 +396,23 @@ h1 i img {
 	height: 1.2em;
 	vertical-align: bottom;
 }
+figure {
+	margin: 0;
+}
 output {
 	display: block;
+	overflow: hidden;
+	text-overflow: ellipsis;
 	white-space: pre;
 }
 caption, th, dt {
 	font-weight: bold;
-}
-table {
-	border-collapse: collapse;
-}
-th, td {
-	border: 1px solid var(--grey-40);
-	padding: 4px 8px;
-}
-th {
-	background: var(--grey-20);
 }
 dl {
 	margin: 0;
 }
 dt {
 	float: left;
-	padding-right: 8px;
 }
 dd {
 	display: inline;
@@ -399,21 +422,12 @@ dd::after {
 	content: '';
 	display: block;
 }
+dd > label {
+	display: inline;
+	padding-left: 1em;
+}
 small {
 	font: var(--body-10);
-}
-textarea {
-	font-size: 15px;
-	height: 160px;
-	max-width: 100%;
-	max-height: 100%;
-	min-height: 100%;
-	padding: 4px;
-	white-space: pre;
-	width: 100%;
-}
-textarea:disabled {
-	height: 100%;
 }
 
 /* Header */
@@ -431,6 +445,7 @@ header {
 	header {
 		display: block;
 		padding: 16px;
+		z-index: 2;
 	}
 }
 header > div {
@@ -468,6 +483,7 @@ nav {
 @media screen and (max-width: 60em) {
 	nav {
 		margin-left: -18rem;
+		overflow-y: scroll;
 		position: fixed;
 		transition: margin-left .3s var(--ease);
 	}
@@ -480,15 +496,14 @@ nav {
 }
 nav h1 {
 	cursor: default;
-	font: var(--title-30);
+	font: var(--title-30, var(--title-20));
 }
 nav h2 {
 	cursor: default;
-	font: var(--title-20);
+	font: var(--title-10, var(--body-20));
 	margin: 0;
 }
 nav ul {
-	line-height: 1;
 	list-style-type: none;
 	padding: 0;
 }
@@ -518,50 +533,71 @@ section {
 .sensibility-opened #sensibility,
 .functions-opened #functions,
 .blacklist-opened #blacklist,
+.beta-opened #beta,
 .about-opened #about {
 	display: block;
 }
 .sensibility-opened [href="#sensibility"],
 .functions-opened [href="#functions"],
 .blacklist-opened [href="#blacklist"],
+.beta-opened [href="#beta"],
 .about-opened [href="#about"] {
 	cursor: default;
 	color: var(--blue-60);
 }
 section h1 {
-	font: var(--title-30, var(--title-20));
+	font: var(--title-30);
+}
+section h2 {
+	font: var(--title-20);
 }
 button[data-i18n="button_update"]:disabled {
 	display: none;
 }
-#sensibility label, #blacklist label {
-	display: block;
+textarea {
+	font-size: 15px;
+	height: 160px;
+	max-width: 100%;
+	max-height: 100%;
+	min-height: 100%;
+	padding: 4px;
+	white-space: pre;
+	width: 100%;
+}
+textarea:disabled {
+	height: 100%;
+}
+fieldset {
+	border: 0;
+	margin: 0;
+	padding: 0;
+}
+fieldset label {
+	display: flex;
 	font: var(--body-10);
 }
-input[type="number"] {
+input[type="number"], input[type="color"] {
 	margin: 4px;
 	width: 48px;
 }
 button[data-i18n="button_save"] {
 	margin: 8px 0;
 }
-td label, td > div {
+table {
+	border-collapse: collapse;
+	font: var(--body-10);
+}
+th, td {
+	border: 1px solid var(--grey-40);
+	padding: 4px 8px;
+}
+th {
+	background: var(--grey-20);
+	word-break: keep-all;
+}
+td > div {
 	align-items: center;
 	display: flex;
-}
-td ul {
-	list-style: none;
-	margin: 0;
-	padding-left: 24px;
-}
-td ul.disabled {
-	opacity: .4;
-}
-td dl label {
-	display: inline-block;
-}
-td input[type="checkbox"] + * {
-	padding-left: 4px;
 }
 #blacklist > form {
 	max-width: 100%;
@@ -572,14 +608,12 @@ td input[type="checkbox"] + * {
 }
 .flex-min {
 	flex: 0 1 auto;
-	margin-right: 16px;
 }
 button.flex-min {
 	align-self: flex-end;
 }
 .flex-max {
-	flex: 1 0 auto;
-	margin-right: 16px;
+	flex: 1 0 calc(100% - 5em);
 }
 .flex-max input {
 	width: 100%;
@@ -589,8 +623,5 @@ button.flex-min {
 }
 #about h1 {
 	cursor: default;
-	font: var(--display-20, var(--display-20));
-}
-#about p {
-	font-size: 1.15em;
+	font: var(--display-20);
 }

@@ -14,13 +14,7 @@
     "none": {
         "message": "None"
     },
-    "options_up2date": {
-        "message": "is up to date."
-    },
-    "options_up2date_not": {
-        "message": "is NOT up to date."
-    },
-    "notice_oninstalled": {
+    "notification-oninstalled": {
         "message": "Thank you for installing!\nClick to customize Opera Gestures."
     }
 }

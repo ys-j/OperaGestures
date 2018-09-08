@@ -4,13 +4,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
  (function () {
 	'use strict';
-	const EXT_URL = browser.extension.getURL('/');
+	const EXT_URL = browser.runtime.getURL('/');
 	let first = true;
 	let startX = -1, startY = -1;
 	
 	self.addEventListener('mousedown', e => {
 		if (e.button === 2) {
-			startX = e.screenX, startY = e.screenY;
 			let closest = e.target.closest('[href]');
 			top.postMessage({
 				href: closest ? closest.href : null,
@@ -60,7 +59,7 @@
 	overlay.style.left = 0;
 	overlay.style.top = 0;
 	overlay.style.zIndex = 0x7fffffff;
-	self.addEventListener('DOMContentLoaded', () => {
+	document.addEventListener('DOMContentLoaded', () => {
 		document.body.appendChild(overlay);
 	});
 
@@ -120,7 +119,6 @@
 			self.removeEventListener('mousemove', checkstate);
 			self.removeEventListener('wheel', onwheel);
 		}
-		return false;
 	}
 
 	self.addEventListener('message', e => {
@@ -155,8 +153,10 @@
 		}],
 	]);
 	port.onMessage.addListener(m => {
-		if (func.has(m.func)) {
+		if (m.func && func.has(m.func)) {
 			func.get(m.func)();
+		} else if (m.error) {
+			throw m.error;
 		}
 	});
 })();

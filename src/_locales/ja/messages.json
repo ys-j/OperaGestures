@@ -12,7 +12,10 @@
 		"message": "感度"
 	},
 	"functions": {
-		"message": "機能"
+		"message": "ジェスチャー"
+	},
+	"beta": {
+		"message": "ベータ機能"
 	},
 	"blacklist": {
 		"message": "除外リスト"
@@ -22,6 +25,9 @@
 	},
 	"about": {
 		"message": "About"
+	},
+	"none": {
+		"message": "なし"
 	},
 	"left": {
 		"message": "左"
@@ -44,8 +50,29 @@
 	"outofrange": {
 		"message": "範囲外"
 	},
-	"none": {
-		"message": "なし"
+	"thickness": {
+		"message": "太さ"
+	},
+	"color": {
+		"message": "色"
+	},
+	"opacity": {
+		"message": "透明度"
+	},
+	"unit_px": {
+		"message": "px"
+	},
+	"unit_px_over": {
+		"message": "px以上"
+	},
+	"unit_degree": {
+		"message": "°以内"
+	},
+	"unit_percent": {
+		"message": "%"
+	},
+	"unit_second": {
+		"message": "秒"
 	},
 	"button_save": {
 		"message": "保存"
@@ -53,124 +80,130 @@
 	"button_confirm": {
 		"message": "確認"
 	},
-	"button_closebrowser": {
-		"message": "ブラウザを終了"
-	},
-	"options_input1": {
-		"message": "ジェスチャー1"
-	},
-	"options_input2": {
-		"message": "ジェスチャー2"
-	},
-	"options_input3": {
-		"message": "有効角度"
-	},
-	"options_input4": {
-		"message": "ホイールジェスチャー"
-	},
-	"options_px": {
-		"message": "px"
-	},
-	"options_pxover": {
-		"message": "px以上"
-	},
-	"options_deg": {
-		"message": "°以内"
-	},
-	"options_output": {
-		"message": "ジェスチャーを検知しました"
-	},
-	"options_functable_caption": {
-		"message": "ジェスチャー一覧（*: 追加機能）"
-	},
-	"options_wlink": {
-		"message": "リンク上"
-	},
-	"options_wolink": {
-		"message": "リンク以外"
-	},
-	"options_left_func": {
-		"message": "履歴の前ページへ戻る"
-	},
-	"options_right_func": {
-		"message": "履歴の次ページへ進む"
-	},
-	"options_upleft_func": {
-		"message": "親階層へ移動する"
-	},
-	"options_updown_func": {
-		"message": "ページを更新する"
-	},
-	"options_up_func": {
-		"message": "読み込みを中止する"
-	},
-	"options_down_func": {
-		"message": "新しいタブを開く"
-	},
-	"options_down_link_func": {
-		"message": "リンクを新しいタブに開く"
-	},
-	"options_downup_func": {
-		"message": "タブを複製する"
-	},
-	"options_downup_link_func": {
-		"message": "リンクをバックグラウンドの新しいタブに開く"
-	},
-	"options_wheel_func": {
-		"message": "アクティブなタブを左/右のタブに切り替える"
-	},
-	"options_wheel_skip": {
-		"message": "ジェスチャーが無効なタブをスキップする"
-	},
-	"options_wheel_skip_warning": {
-		"message": "メモリ解放されたタブ/まだ読み込まれていないタブはスキップできません。"
-	},
-	"options_downright_func": {
-		"message": "タブを閉じる"
-	},
-	"options_downleft_func": {
-		"message": "ウィンドウを最小化する"
-	},
-	"options_upright_func": {
-		"message": "ウィンドウを最大化する"
-	},
-	"options_rightup_func": {
-		"message": "最近閉じたタブ/ウィンドウを復元する"
-	},
-	"options_blacklist_description": {
-		"message": "リストには正規表現パターンを使用します。"
-	},
-	"options_defaultblacklist": {
-		"message": "既定のリスト（編集不可）"
-	},
-	"options_userblacklist": {
-		"message": "ユーザー定義のリスト"
-	},
-	"options_confirm_url": {
-		"message": "URLを除外リストと照合する"
-	},
-	"options_matched_pattern": {
-		"message": "一致するパターン"
-	},
-	"options_required_restart": {
-		"message": "適用するにはアドオンの再起動が必要です。"
-	},
-	"options_onsaved": {
-		"message": "保存しました"
-	},
-	"options_onsaved_restartaddon": {
+	"button_restart_addon": {
 		"message": "アドオンを再起動"
 	},
-	"options_warning_restartaddon": {
-		"message": "お使いのブラウザバージョンでは自動でアドオンを再起動できません。\n変更を適用するには手動でブラウザを再起動してください。"
+	"notice_saved": {
+		"message": "保存しました"
 	},
-	"options_support_AMO": {
+	"warning_required_restart": {
+		"message": "適用するにはアドオンの再起動が必要です。"
+	},
+	"warning_restart_addon": {
+		"message": "お使いのブラウザバージョンでは自動でアドオンを再起動できません。\n変更を適用するには、アドオンまたはブラウザ再起動後にそれぞれのタブを手動で再読込してください。"
+	},
+	"warning_wheel_skip": {
+		"message": "読み込まれていないタブはスキップできません。"
+	},
+	"notification-oninstalled": {
+		"message": "インストールありがとうございます！\nクリックで設定画面を開きます。"
+	},
+	"sensibility-1st_gesture": {
+		"message": "ジェスチャー1"
+	},
+	"sensibility-2nd_gesture": {
+		"message": "ジェスチャー2"
+	},
+	"sensibility-angle_range": {
+		"message": "有効角度"
+	},
+	"sensibility-wheel_gesture": {
+		"message": "ホイールジェスチャー"
+	},
+	"sensibility-detect_gesture": {
+		"message": "ジェスチャーを検知しました:"
+	},
+	"functions-table_caption": {
+		"message": "ジェスチャー一覧（*: 追加機能）"
+	},
+	"functions-wlink": {
+		"message": "リンク上"
+	},
+	"functions-wolink": {
+		"message": "リンク以外"
+	},
+	"functions-description-left": {
+		"message": "履歴の前ページへ戻る"
+	},
+	"functions-description-right": {
+		"message": "履歴の次ページへ進む"
+	},
+	"functions-description-upleft": {
+		"message": "親階層へ移動する"
+	},
+	"functions-description-updown": {
+		"message": "ページを更新する"
+	},
+	"functions-description-up": {
+		"message": "読み込みを中止する"
+	},
+	"functions-description-down": {
+		"message": "新しいタブを開く"
+	},
+	"functions-description-down_link": {
+		"message": "リンクを新しいタブに開く"
+	},
+	"functions-description-downup": {
+		"message": "タブを複製する"
+	},
+	"functions-description-downup_link": {
+		"message": "リンクをバックグラウンドの新しいタブに開く"
+	},
+	"functions-description-wheel": {
+		"message": "アクティブなタブを左/右のタブに切り替える"
+	},
+	"functions-wheel_skip": {
+		"message": "ジェスチャーが無効なタブをスキップする"
+	},
+	"functions-description-downright": {
+		"message": "タブを閉じる"
+	},
+	"functions-description-downleft": {
+		"message": "ウィンドウを最小化する"
+	},
+	"functions-description-upright": {
+		"message": "ウィンドウを最大化する"
+	},
+	"functions-description-rightup": {
+		"message": "最近閉じたタブ/ウィンドウを復元する"
+	},
+	"blacklist-write_regexp": {
+		"message": "リストには正規表現パターンを使用します。"
+	},
+	"blacklist-default_blacklist": {
+		"message": "既定のリスト（編集不可）"
+	},
+	"blacklist-user_blacklist": {
+		"message": "ユーザー定義のリスト"
+	},
+	"blacklist-confirm_url": {
+		"message": "URLを除外リストと照合する"
+	},
+	"blacklist-matched_pattern": {
+		"message": "一致するパターン:"
+	},
+	"locus-draw": {
+		"message": "ポインターの軌跡を描く"
+	},
+	"locus-prefer_themecolor": {
+		"message": "ページのテーマカラーを優先する"
+	},
+	"touch-emulate": {
+		"message": "ジェスチャー機能をタッチでエミュレートする"
+	},
+	"touch-description": {
+		"message": "ダブルタップで認識を開始します。"
+	},
+	"touch-duration_doubletap": {
+		"message": "ダブルタップの認識時間"
+	},
+	"touch-margin_doubletap": {
+		"message": "ダブルタップの許容誤差"
+	},
+	"about-description-AMO": {
 		"message": "評価・レビュー"
 	},
-	"options_support_GitHub": {
+	"about-description-GitHub": {
 		"message": "リクエスト・バグ報告"
-	},
-	"notice_oninstalled": {
-		"message": "インストールありがとうございます！\nクリックで設定画面を開きます。"
 	}
 }

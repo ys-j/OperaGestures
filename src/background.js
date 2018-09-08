@@ -7,13 +7,17 @@
 	Array.prototype.last = function (i) {
 		return this[this.length - (i || 0) - 1];
 	};
-	
+
+	let locus = false, touch = false;
 	let ports = [];
 	let enabled;
 	let blacklist = [];
 	
 	// load storage
-	browser.storage.local.get(['gesture', 'blacklist']).then(v => {
+	browser.storage.local.get(['config', 'gesture', 'blacklist']).then(v => {
+		locus = v && v.config.locus || false;
+		touch = v && v.config.touch || false;
+
 		let basic = 2047, extra = 0;
 		let gesture = v && v.gesture;
 		if (gesture) {
@@ -27,12 +31,16 @@
 			browser.notifications.create({
 				type: 'basic',
 				title: 'Opera Gestures',
-				message: browser.i18n.getMessage('notice_oninstalled'),
+				message: browser.i18n.getMessage('notification-oninstalled'),
 				iconUrl: browser.runtime.getURL('icon.svg'),
 			});
+			// for Android
+			if (!('windows' in browser)) {
+				basic = 511;
+			}
 			browser.storage.local.set({
 				version: browser.runtime.getManifest().version,
-				gesture: { basic: 2047, extra: 0 },
+				gesture: { basic: basic, extra: extra },
 			});
 		}
 		enabled = new Map([
@@ -60,8 +68,22 @@
 
 	browser.runtime.onConnect.addListener(p => {
 		if (!blacklist.some(re => re.test(p.sender.url))) {
-			ports[p.sender.tab.id] = p;
+			let id = p.sender.tab.id;
+			ports[id] = p;
 			p.onMessage.addListener(onmessage.bind(p));
+			if (locus) {
+				browser.tabs.executeScript(id, {
+					file: 'locus.js',
+					runAt: 'document_end',
+				});
+			}
+			if (touch) {
+				browser.tabs.executeScript(id, {
+					allFrames: true,
+					file: 'touch.js',
+					runAt: 'document_end',
+				});
+			}
 		}
 	});
 
@@ -69,33 +91,31 @@
 	let gestures = [];
 	let isUrl = url => typeof url === 'string' && url.startsWith('http');
 	let func = new Map([
-		['down', function (url) {
+		['down', async function (url) {
 			let opt = isUrl(url) ? { url: url } : {};
 			browser.tabs.create(opt);
 		}],
-		['down,up', function (url) {
-			let opt = {
-				active: false,
-				url: isUrl(url) ? url : this.sender.url,
-			};
-			browser.tabs.create(opt);
+		['down,up', async function (url) {
+			let _ = isUrl(url);
+			if (!_ && 'duplicate' in browser.tabs) {
+				browser.tabs.duplicate(this.sender.tab.id);
+			} else {
+				let opt = { active: false, url: _ ? url : this.sender.url };
+				browser.tabs.create(opt);
+			}
 		}],
-		['down,right', function () {
+		['down,right', async function () {
 			browser.tabs.remove(this.sender.tab.id);
 		}],
 		['down,left', async function () {
 			let currentWindow = await browser.windows.getCurrent();
-			if (currentWindow) {
-				let opt = { state: 'minimized' };
-				browser.windows.update(currentWindow.id, opt);
-			}
+			let opt = { state: 'minimized' };
+			browser.windows.update(currentWindow.id, opt);
 		}],
 		['up,right', async function () {
 			let currentWindow = await browser.windows.getCurrent();
-			if (currentWindow) {
-				let opt = { state: currentWindow.state === 'normal' ? 'maximized' : 'normal' };
-				browser.windows.update(currentWindow.id, opt);
-			}
+			let opt = { state: currentWindow.state === 'normal' ? 'maximized' : 'normal' };
+			browser.windows.update(currentWindow.id, opt);
 		}],
 		['right,up', async function () {
 			let sessions = await browser.sessions.getRecentlyClosed({ maxResults: 1 });
@@ -152,7 +172,9 @@
 				let gesture = gestures.join();
 				if (enabled.get(gesture)) {
 					if (func.has(gesture)) {
-						func.get(gesture).bind(port)(m.url);
+						func.get(gesture).bind(port)(m.url).catch(e => {
+							port.postMessage({ error: e });
+						});
 					} else {
 						port.postMessage({ func: gesture });
 					}

@@ -12,6 +12,7 @@
 	let fe = document.forms.fe;	// functions (extra)
 	let b = document.forms.b;	// blacklist (list)
 	let c = document.forms.c;	// blacklist (confirm)
+	let g = document.forms.g;	// beta features
 	let fbc = Array.from(fb);
 	let gesture = document.getElementById('gesture');
 	let matchedPattern = document.getElementById('matchedPattern');
@@ -30,7 +31,7 @@
 	(function subst_i18n() {
 		let lang = browser.i18n.getUILanguage();
 		document.documentElement.setAttribute('lang', lang === 'ja' ? 'ja' : 'en');
-		Array.from(document.querySelectorAll('[data-i18n]')).forEach(elem => {
+		document.querySelectorAll('[data-i18n]').forEach(elem => {
 			let args = [];
 			for (let i = 1; i < 9; i++) {
 				let data = elem.dataset['i18n-$' + i];
@@ -45,7 +46,7 @@
 				elem.textContent = msg;
 			}
 		});
-		Array.from(document.querySelectorAll('[data-subst]')).forEach(elem => {
+		document.querySelectorAll('[data-subst]').forEach(elem => {
 			let msg = EXT_MANIFEST[elem.dataset.subst];
 			if (msg && typeof msg === 'string') {
 				elem.textContent = msg;
@@ -53,7 +54,7 @@
 		})
 	})();
 
-	// menu / section
+	// menu, section
 	function toggleNav() {
 		document.body.classList.toggle('nav-opened');
 	}
@@ -72,16 +73,14 @@
 	window.onload = openSection;
 
 	// message pop
-	let pops = document.getElementsByClassName('message');
-	Array.from(pops).forEach(pop => {
+	Array.from(document.getElementsByClassName('message')).forEach(pop => {
 		pop.addEventListener('transitionend', e => {
 			if (e.target !== document.activeElement) {
 				e.target.hidden = true;
 			}
 		}, { passive: true });
 		// for Firefox 52
-		let btns = pop.getElementsByTagName('button');
-		Array.from(btns).forEach(btn => {
+		Array.from(pop.getElementsByTagName('button')).forEach(btn => {
 			btn.onmousedown = e => e.preventDefault();
 		})
 	});
@@ -103,22 +102,30 @@
 	}
 
 	// update nested checkboxes
-	function updateNestedCheckboxes() {
-		let ul = fb.w.parentElement.nextElementSibling;
-		let disabled = !fb.w.checked;
-		ul.classList[disabled ? 'add' : 'remove']('disabled');
-		fe.w1.disabled = disabled;
+	function updateNestedCheckboxes(e) {
+		let nests;
+		if (e) {
+			// label:has(e.target) + fieldset.nest-child
+			nests = [e.target.parentElement.nextElementSibling];
+		} else {
+			nests = Array.from(document.getElementsByClassName('nest-child'));
+		}
+		nests.forEach(nest => {
+			nest.disabled = !nest.previousElementSibling.firstElementChild.checked;
+		});
 	}
 
-	// load config, gesture, blacklist
-	browser.storage.local.get(['config', 'gesture', 'blacklist']).then(STORAGE => {
+	// load storage
+	browser.storage.local.get(['config', 'gesture', 'blacklist', 'locus', 'touch']).then(STORAGE => {
 		const INITIAL = {
 			config: { mm1: 32, mm2: 16, ar: 30, wm: 4 },
-			gesture: { basic: 2047, extra: 0 },
+			locus: { style: { strokeStyle: '#30e60b', lineWidth: 3 }, opacity: 0.5, themecolor: false },
+			touch: { duration: 300, margin: 32 },
+			gesture: { basic: 2047 , extra: 0 },
 			blacklist: [],
 		};
 
-		let config = STORAGE.config || INITIAL.config;
+		let config = STORAGE.config || INITIAL.config;		
 		s.mm1.value = config.mm1;
 		s.mm2.value = config.mm2;
 		s.ar.value = config.ar;
@@ -132,13 +139,42 @@
 		fbc.forEach((elem, i) => {
 			elem.checked = gesture.basic & Math.pow(2, i);
 		});
-		fe.ru.checked = gesture.extra & 1;
+		// for Android
+		if (!('windows' in browser)) {
+			fbc[9].checked = fbc[10].checked = false;
+			fbc[9].disabled = fbc[10].disabled = true;
+		}
+		if (!('sessions' in browser)) {
+			fe.ru.checked = false;
+			fe.ru.disabled = true;
+		} else {
+			fe.ru.checked = gesture.extra & 1;
+		}
 		fe.w1.checked = gesture.extra & 2;
 		fb.w.onchange = updateNestedCheckboxes;
-		updateNestedCheckboxes();
 
 		let blacklist = STORAGE.blacklist || INITIAL.blacklist;
 		b.ul.value = blacklist.join('\n');
+		
+		let locus = STORAGE.locus || INITIAL.locus;
+		g.locus.checked = config.locus || false;
+		g.lt.value = locus.style.lineWidth;
+		g.lc.value = locus.style.strokeStyle;
+		g.lco.value = g.lc.value;
+		g.lptc.checked = locus.themecolor;
+		g.lo.value = locus.opacity * 100;
+		g.locus.onchange = updateNestedCheckboxes;
+		g.lc.onchange = () => {
+			g.lco.value = g.lc.value;
+		};
+
+		let touch = STORAGE.touch || INITIAL.touch;
+		g.touch.checked = config.touch || false;
+		g.td.value = touch.duration * 0.001;
+		g.tm.value = touch.margin;
+		g.touch.onchange = updateNestedCheckboxes;
+		
+		updateNestedCheckboxes();
 	});
 
 	// reload extenison
@@ -150,22 +186,20 @@
 			browser.runtime.reload();
 		};
 	} else {
-		// for Firefox 52
+		// for Firefox 52, Android
 		let dialog = document.getElementsByClassName('dialog')[0];
-		let msgboxes = dialog.getElementsByClassName('message');
-		Array.from(msgboxes).forEach(msgbox => {
+		let msgboxes = Array.from(dialog.getElementsByClassName('message'));
+		msgboxes.forEach(msgbox => {
 			let btns = msgbox.getElementsByTagName('button');
-			btns[0].onclick = async () => {
-				let windows = await browser.windows.getAll();
-				windows.forEach(window => {
-					browser.windows.remove(window.id);
-				});
+			btns[0].onclick = () => {
+				browser.runtime.reload();
 			};
 			btns[1].onclick = () => {
 				msgbox.addEventListener('transitionend', () => {
 					document.body.classList.remove('dialog-opened')
 					msgbox.hidden = true;
 				}, { once: true, passive: true });
+				msgbox.focus();
 				msgbox.classList.remove('nofocus');
 				msgbox.blur();
 			};
@@ -181,32 +215,33 @@
 		};
 	}
 
+	// save
+	let popSaved = document.getElementById('pop-saved');
+	popSaved.lastElementChild.onclick = reloadExtension;
+	let saveConfig = () => browser.storage.local.set({
+		version: EXT_MANIFEST.version,
+		config: {
+			locus: g.locus.checked,
+			touch: g.touch.checked,
+			mm1: s.mm1.value | 0,
+			mm2: s.mm2.value | 0,
+			ar: s.ar.value | 0,
+			wm: s.wm.value | 0,
+		},
+	});
+
 	// save config
-	let sensibilitySect = document.getElementById('sensibility');
-	let popS = sensibilitySect.getElementsByClassName('success')[0];
-	popS.lastElementChild.onclick = reloadExtension;
 	s.onsubmit = () => {
 		if (s.checkValidity()) {
-			browser.storage.local.set({
-				version: EXT_MANIFEST.version,
-				config: {
-					mm1: s.mm1.value | 0,
-					mm2: s.mm2.value | 0,
-					ar: s.ar.value | 0,
-					wm: s.wm.value | 0,
-				},
-			}).then(() => {
-				popS.hidden = false;
-				popS.focus();
+			saveConfig().then(() => {
+				popSaved.hidden = false;
+				popSaved.focus();
 			});
 		}
 		return false;
 	};
 
 	// save gesture
-	let functionsSect = document.getElementById('functions');
-	let popF = functionsSect.getElementsByClassName('success')[0];
-	popF.lastElementChild.onclick = reloadExtension;
 	fb.onsubmit = () => {
 		let basic = 0, extra = 0;
 		fbc.forEach((elem, i) => {
@@ -218,24 +253,21 @@
 			version: EXT_MANIFEST.version,
 			gesture: { basic: basic, extra: extra },
 		}).then(() => {
-			popF.hidden = false;
-			popF.focus();
+			popSaved.hidden = false;
+			popSaved.focus();
 		});
 		return false;
 	};
 
 	// save blacklist
-	let blacklistSect = document.getElementById('blacklist');
-	let popB = blacklistSect.getElementsByClassName('success')[0];
-	popB.lastElementChild.onclick = reloadExtension;
 	b.onsubmit = () => {
 		let v = b.ul.value.replace(/\\\//g, '/');
 		browser.storage.local.set({
 			version: EXT_MANIFEST.version,
 			blacklist: v ? v.split('\n').filter(s => s.length) : [],
 		}).then(() => {
-			popB.hidden = false;
-			popB.focus();
+			popSaved.hidden = false;
+			popSaved.focus();
 		});
 		return false;
 	};
@@ -253,6 +285,28 @@
 		}
 		matchedPattern.parentElement.hidden = false;
 		matchedPattern.parentElement.focus();
+		return false;
+	};
+
+	// save beta features
+	g.onsubmit = () => {
+		saveConfig().then(() => browser.storage.local.set({
+			locus: {
+				style: {
+					lineWidth: g.lt.value | 0,
+					strokeStyle: g.lc.value,
+				},
+				opacity: g.lo.value * 0.01,
+				themecolor: g.lptc.checked,
+			},
+			touch: {
+				duration: g.td.value * 1000,
+				margin: g.tm.value | 0,
+			},
+		})).then(() => {
+			popSaved.hidden = false;
+			popSaved.focus();
+		});
 		return false;
 	};
 

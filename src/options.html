@@ -3,6 +3,7 @@
 <title>Opera Gestures</title>
 <link rel=license href=http://mozilla.org/MPL/2.0/ >
 <link rel=stylesheet href=options.css>
+<meta name=viewport content=width=device-width,initial-scale=1>
 <body class=about-opened>
 	<header>
 		<div class=center>
@@ -18,6 +19,7 @@
 					<li><a href=#sensibility data-i18n=sensibility>Sensibility</a>
 					<li><a href=#functions data-i18n=functions>Functions</a>
 					<li><a href=#blacklist data-i18n=blacklist>Blacklist</a>
+					<li><a href=#beta data-i18n=beta>Beta Features</a>
 				</ul>
 			<li>
 				<h2 data-i18n=help>Help</h2>
@@ -31,7 +33,7 @@
 			<h1 data-i18n=sensibility>Sensibility</h1>
 			<div class=message-container>
 				<div class="message inline" tabindex=-1 hidden>
-					<span data-i18n=options_output>Gestures detected</span>:
+					<span data-i18n=sensibility-detect_gesture>Gestures detected:</span>
 					<output id=gesture role=status></output>
 				</div>
 			</div>
@@ -65,60 +67,74 @@
 						<text x="0" y="2">1</text>
 						<text x="0" y="14">2</text>
 					</svg>
-					<label><span data-i18n=options_input1>1st gesture</span> <input name=mm1 type=number min=1> <span data-i18n=options_pxover>px and over</span></label>
-					<label><span data-i18n=options_input2>2nd gesture</span> <input name=mm2 type=number min=1> <span data-i18n=options_pxover>px and over</span></label>
-					<label><span data-i18n=options_input3>Angle range</span> <input name=ar type=number min=1 max=90> <span data-i18n=options_deg>deg</span></label>
-					<label><span data-i18n=options_input4>Wheel gesture</span> <input name=wm type=number min=1> <span data-i18n=options_px>px</span></label>
+					<fieldset>
+						<label>
+							<span data-i18n=sensibility-1st_gesture>1st gesture</span>
+							<input name=mm1 type=number min=1 required>
+							<span data-i18n=unit_px_over>px and over</span>
+						</label>
+						<label>
+							<span data-i18n=sensibility-2nd_gesture>2nd gesture</span>
+							<input name=mm2 type=number min=1 required>
+							<span data-i18n=unit_px_over>px and over</span>
+						</label>
+						<label>
+							<span data-i18n=sensibility-angle_range>Angle range</span>
+							<input name=ar type=number min=1 max=90 required>
+							<span data-i18n=unit_degree>deg</span>
+						</label>
+						<label>
+							<span data-i18n=sensibility-wheel_gesture>Wheel gesture</span>
+							<input name=wm type=number min=1 required>
+							<span data-i18n=unit_px>px</span>
+						</label>
+					</fieldset>
 					<button class="primary puffy" data-i18n=button_save>Save</button>
 					<div class="message warning runin">
-						<span data-i18n=options_required_restart>Require to restart add-on.</span>
+						<span data-i18n=warning_required_restart>Require to restart add-on.</span>
 					</div>
 				</form>
-			</div>
-			<div class="message bottom success" tabindex=-1 hidden>
-				<span data-i18n=options_onsaved>Saved!</span>
-				<button type=button data-i18n=options_onsaved_restartaddon>Restart add-on</button>
 			</div>
 		</section>
 		<section id=functions role=tabpanel>
 			<h1 data-i18n=functions>Functions</h1>
 			<form name=fb>
 				<table>
-					<caption data-i18n=options_functable_caption>List of Functions (*: Extra)</caption>
+					<caption data-i18n=functions-table_caption>List of Functions (*: Extra)</caption>
 					<tr>
 						<th><span data-i18n=left>left</span>
 						<td>
 							<label>
 								<input name=l type=checkbox>
-								<span data-i18n=options_left_func>Go to previous page in history</span>
+								<span data-i18n=functions-description-left>Go to previous page in history</span>
 							</label>
 					<tr>
 						<th><span data-i18n=right>right</span>
 						<td>
 							<label>
 								<input name=r type=checkbox>
-								<span data-i18n=options_right_func>Go to next page in history</span>
+								<span data-i18n=functions-description-right>Go to next page in history</span>
 							</label>
 					<tr>
 						<th><span data-i18n=up>up</span>→<span data-i18n=left>left</span>
 						<td>
 							<label>
 								<input name=ul type=checkbox>
-								<span data-i18n=options_upleft_func>Go to parent directory</span>
+								<span data-i18n=functions-description-upleft>Go to parent directory</span>
 							</label>
 					<tr>
 						<th><span data-i18n=up>up</span>→<span data-i18n=down>down</span>
 						<td>
 							<label>
 								<input name=ud type=checkbox>
-								<span data-i18n=options_updown_func>Refresh page</span>
+								<span data-i18n=functions-description-updown>Refresh page</span>
 							</label>
 					<tr>
 						<th><span data-i18n=up>up</span>
 						<td>
 							<label>
 								<input name=u type=checkbox>
-								<span data-i18n=options_up_func>Stop loading</span>
+								<span data-i18n=functions-description-up>Stop loading</span>
 							</label>
 					<tr>
 						<th><span data-i18n=down>down</span>
@@ -126,10 +142,10 @@
 							<div>
 								<input id=checkD name=d type=checkbox>
 								<dl>
-									<dt data-i18n=options_wlink>w/ link
-									<dd><label for=checkD data-i18n=options_down_link_func>Open link in a new tab</label>
-									<dt data-i18n=options_wolink>w/o link
-									<dd><label for=checkD data-i18n=options_down_func>Open a new tab</label>
+									<dt data-i18n=functions-wlink>w/ link
+									<dd><label for=checkD data-i18n=functions-description-down_link>Open link in a new tab</label>
+									<dt data-i18n=functions-wolink>w/o link
+									<dd><label for=checkD data-i18n=functions-description-down>Open a new tab</label>
 								</dl>
 							</div>
 					<tr>
@@ -138,108 +154,158 @@
 							<div>
 								<input id=checkDU name=du type=checkbox>
 								<dl>
-									<dt data-i18n=options_wlink>w/ link
-									<dd><label for=checkDU data-i18n=options_downup_link_func>Open link in a new background tab</label>
-									<dt data-i18n=options_wolink>w/o link
-									<dd><label for=checkDU data-i18n=options_downup_func>Open a copy in a background tab</label>
+									<dt data-i18n=functions-wlink>w/ link
+									<dd><label for=checkDU data-i18n=functions-description-downup_link>Open link in a new background tab</label>
+									<dt data-i18n=functions-wolink>w/o link
+									<dd><label for=checkDU data-i18n=functions-description-downup>Open a copy in a background tab</label>
 								</dl>
 							</div>
 					<tr>
 						<th><span data-i18n=wheel>wheel</span><br>(<span data-i18n=up>up</span>/<span data-i18n=down>down</span>)
 						<td>
-							<label>
+							<label class=nest-parent>
 								<input name=w type=checkbox>
-								<span data-i18n=options_wheel_func>Switch active tab to the left/right one</span>
+								<span data-i18n=functions-description-wheel>Switch active tab to the left/right one</span>
 							</label>
-							<ul class=disabled>
-								<li>
-									<label>
-										<input name=w1 type=checkbox form=fe disabled>
-										<span data-i18n=options_wheel_skip>Skip a tab that gestures don't work</span>
-									</label>
-									<div class="message warning">
-										<span data-i18n=options_wheel_skip_warning>Cannot skip a tab that is discarded or not yet loaded.</span>
-									</div>
-							</ul>
+							<fieldset class=nest-child form=fe>
+								<label>
+									<input name=w1 type=checkbox form=fe>
+									<span data-i18n=functions-wheel_skip>Skip a tab that gestures don't work</span>
+								</label>
+								<div class="message warning">
+									<span data-i18n=warning_wheel_skip>Cannot skip a tab that is discarded or not yet loaded.</span>
+								</div>
+							</fieldset>
 					<tr>
 						<th><span data-i18n=down>down</span>→<span data-i18n=right>right</span>
 						<td>
 							<label>
 								<input name=dr type=checkbox>
-								<span data-i18n=options_downright_func>Close current tab</span>
+								<span data-i18n=functions-description-downright>Close current tab</span>
 							</label>
 					<tr>
 						<th><span data-i18n=down>down</span>→<span data-i18n=left>left</span>
 						<td>
 							<label>
 								<input name=dl type=checkbox>
-								<span data-i18n=options_downleft_func>Minimize window</span>
+								<span data-i18n=functions-description-downleft>Minimize window</span>
 							</label>
 					<tr>
 						<th><span data-i18n=up>up</span>→<span data-i18n=right>right</span>
 						<td>
 							<label>
 								<input name=ur type=checkbox>
-								<span data-i18n=options_upright_func>Maximize window</span>
+								<span data-i18n=functions-description-upright>Maximize window</span>
 							</label>
 					<tr>
 						<th><span data-i18n=right>right</span>→<span data-i18n=up>up</span>*
 						<td>
 							<label>
 								<input name=ru type=checkbox form=fe>
-								<span data-i18n=options_rightup_func>Restore recently closed tab/window</span>
+								<span data-i18n=functions-description-rightup>Restore recently closed tab/window</span>
 							</label>
 				</table>
 				<button class="primary puffy" data-i18n=button_save>Save</button>
 				<div class="message warning runin">
-					<span data-i18n=options_required_restart>Require to restart add-on.</span>
+					<span data-i18n=warning_required_restart>Require to restart add-on.</span>
 				</div>
 			</form>
 			<form id=fe name=fe></form>
-			<div class="message bottom success" tabindex=-1 hidden>
-				<span data-i18n=options_onsaved>Saved!</span>
-				<button type=button data-i18n=options_onsaved_restartaddon>Restart add-on</button>
-			</div>
 		</section>
 		<section id=blacklist role=tabpanel>
 			<h1 data-i18n=blacklist>Blacklist</h1>
-			<p><span data-i18n=options_blacklist_description>Write in regular expression.</span> (<a href=https://developer.mozilla.org/docs/Web/JavaScript/Guide/Regular_Expressions#Writing_a_Regular_Expression_Pattern target=_blank>MDN</a>)</p>
+			<p><span data-i18n=blacklist-write_regexp>Write in regular expression.</span> (<a href=https://developer.mozilla.org/docs/Web/JavaScript/Guide/Regular_Expressions#Writing_a_Regular_Expression_Pattern target=_blank>MDN</a>)</p>
 			<form name=b>
-				<label data-i18n=options_defaultblacklist>Default Blacklist (Not editable)</label>
-				<textarea disabled name=dl lang=en rows=5>^(?:about|chrome|file|jar|moz-extension|resource|view-source):&#xa;\.(?:pdf|svg)$&#xa;^https?://addons\.mozilla\.org/&#xa;^https?://testpilot\.firefox\.com/</textarea>
-				<label for=userlist data-i18n=options_userblacklist>User Blacklist</label>
-				<textarea id=userlist name=ul lang=en spellcheck=false></textarea>
+				<fieldset>
+					<label data-i18n=blacklist-default_blacklist>Default Blacklist (Not editable)</label>
+					<textarea disabled name=dl lang=en rows=5>^(?:about|chrome|file|jar|moz-extension|resource|view-source):&#xa;\.(?:pdf|svg)$&#xa;^https?://addons\.mozilla\.org/&#xa;^https?://testpilot\.firefox\.com/</textarea>
+					<label for=userlist data-i18n=blacklist-user_blacklist>User Blacklist</label>
+					<textarea id=userlist name=ul lang=en spellcheck=false></textarea>
+				</fieldset>
 				<button class="primary puffy" data-i18n=button_save>Save</button>
 				<div class="message warning runin">
-					<span data-i18n=options_required_restart>Require to restart add-on.</span>
+					<span data-i18n=warning_required_restart>Require to restart add-on.</span>
 				</div>
 			</form>
-			<div class="message bottom success" tabindex=-1 hidden>
-				<span data-i18n=options_onsaved>Saved!</span>
-				<button type=button data-i18n=options_onsaved_restartaddon>Restart add-on</button>
-			</div>
 			<form class=flex name=c>
-				<label class=flex-max>
-					<span data-i18n=options_confirm_url>Confirm if URL matches blacklist</span>
-					<input type=url name=url placeholder=http://example.com/ required>
-				</label>
+				<fieldset class=flex-max>
+					<label>
+						<span data-i18n=blacklist-confirm_url>Confirm if URL matches blacklist</span>
+						<input type=url name=url placeholder=http://example.com/ required>
+					</label>
+				</fieldset>
 				<button class=flex-min data-i18n=button_confirm>Confirm</button>
 			</form>
 			<div class=message-container>
 				<div class="message inline" tabindex=-1 hidden>
-					<span data-i18n=options_matched_pattern>Matched patterns</span>:
+					<span data-i18n=blacklist-matched_pattern>Matched patterns:</span>
 					<output id=matchedPattern role=status></output>
 				</div>
 			</div>
 		</section>
-		<section id=about>
+		<section id=beta role=tabpanel>
+			<h1 data-i18n=beta>Beta Features</h1>
+			<form name=g>
+				<label class=nest-parent>
+					<input name=locus type=checkbox>
+					<span data-i18n=locus-draw>Draw pointer locus</span>
+				</label>
+				<fieldset class=nest-child>
+					<label>
+						<span data-i18n=thickness>Thickness</span>
+						<input name=lt type=number min=1 required>
+						<span data-i18n=unit_px>px</span>
+					</label>
+					<div class=flex>
+						<label>
+							<span data-i18n=color>Color</span>
+							<input name=lc type=color required>
+							<output name=lco></output>
+						</label>
+						<label>
+							<input name=lptc type=checkbox>
+							<span data-i18n=locus-prefer_themecolor>Prefer the page's theme color</span>
+						</label>
+					</div>
+					<label>
+						<span data-i18n=opacity>Opacity</span>
+						<input name=lo type=number min=0 max=100 required>
+						<span data-i18n=unit_percent>%</span>
+					</label>
+				</fieldset>
+				<br>
+				<label class=nest-parent>
+					<input name=touch type=checkbox>
+					<span data-i18n=touch-emulate>Emulate gestures by touch (beta)</span>
+				</label>
+				<fieldset class=nest-child>
+					<div class="message runin">
+						<span data-i18n=touch-description>Detecting starts with a double tap.</span>
+					</div>
+					<label>
+						<span data-i18n=touch-duration_doubletap>Duration detecting a double tap</span>
+						<input name=td type=number min=0.01 max=1 step=0.01 required>
+						<span data-i18n=unit_second>s</span>
+					</label>
+					<label>
+						<span data-i18n=touch-margin_doubletap>Margin of a double tap</span>
+						<input name=tm type=number min=0 required>
+						<span data-i18n=unit_px>px</span>
+					</label>
+				</fieldset>
+				<br>
+				<button class="primary puffy" data-i18n=button_save>Save</button>
+				<div class="message warning runin">
+					<span data-i18n=warning_required_restart>Require to restart add-on.</span>
+				</div>
+			</form>
+		</section>
+		<section id=about role=tabpanel>
 			<h1>Thank you for using <i><img alt=O src=icon.svg>pera Gestures</i>!</h1>
-			<p>
-				<i data-subst=name></i> v<span data-subst=version></span>
-			</p>
+			<h2><i data-subst=name></i> v<span data-subst=version></span></h2>
 			<ul>
-				<li><a href=https://addons.mozilla.org/firefox/addon/opera-gestures/ target=_blank>AMO</a> - <span data-i18n=options_support_AMO>Rating and review</span>
-				<li><a href=https://github.com/ys0115/OperaGestures target=_blank>GitHub</a> - <span data-i18n=options_support_GitHub>Request and bug report</span>
+				<li><a href=https://addons.mozilla.org/firefox/addon/opera-gestures/ target=_blank>AMO</a> - <span data-i18n=about-description-AMO>Rating and review</span>
+				<li><a href=https://github.com/ys0115/OperaGestures target=_blank>GitHub</a> - <span data-i18n=about-description-GitHub>Request and bug report</span>
 			</ul>
 			<p>
 				<small>This page design is based on <a href=https://design.firefox.com/photon/ target=_blank>Photon Design System</a> by Mozilla.</small>
@@ -249,12 +315,16 @@
 				<small>This add-on is licensed under the <a href=http://mozilla.org/MPL/2.0/ target=_blank>Mozilla Public License, version 2.0</a>.</small>
 			</p>
 		</section>
+		<div id=pop-saved class="message success bottom" tabindex=-1 hidden>
+			<span data-i18n=notice_saved>Saved!</span>
+			<button type=button data-i18n=button_restart_addon>Restart add-on</button>
+		</div>
 	</main>
 	<div id=overlay></div>
-	<div class=dialog>
-		<div class="message inline warning" tabindex=-1 hidden>
-			<span data-i18n="options_warning_restartaddon">Cannot reload the add-on automatically on your browser version.&#xa;Please restart the browser manually to apply modification.</span>
-			<button type=button data-i18n=button_closebrowser>Close browser</button>
+	<div class=dialog tabindex=-1>
+		<div class="message warning inline" tabindex=-1 hidden>
+			<span data-i18n=warning_restart_addon>Cannot reload the add-on automatically on your browser version.&#xa;Please reload each tab manually to apply modification after restarting add-on or browser.</span>
+			<button type=button data-i18n=button_restart_addon>Restart add-on</button>
 			<button class=close></button>
 		</div>
 	</div>
