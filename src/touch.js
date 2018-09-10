@@ -42,11 +42,17 @@
 	let eventTarget = document.getElementById(ID_PREFIX + 'canvas') || top;
 
 	// load config
-	let duration = 300;
+	let wheelMoving = 32;
+	let minDelta = 4;
+	let duration = 200;
 	let margin = 32;
-	browser.storage.local.get(['touch']).then(v => {
+	browser.storage.local.get(['config', 'touch']).then(v => {
+		if (v && v.config) {
+			wheelMoving = v.congig.mm1 || 32;
+			minDelta = v.config.wm || 4;
+		}
 		if (v && v.touch) {
-			duration = v.touch.duration || 300;
+			duration = v.touch.duration || 200;
 			margin = v.touch.margin || 32;
 		}
 	});
@@ -54,7 +60,7 @@
 	// main
 	let timer;
 	let counter = 0;
-	let tapCoord = [];
+	let tapCoord = [], tap2Coord = new Map();
 	let inRange = (x, y) => {
 		let tx = tapCoord[0], ty = tapCoord[1];
 		return tx && ty && (tx - margin <= x && x <= tx + margin) && (ty - margin <= y && y <= ty + margin);
@@ -66,7 +72,7 @@
 		return tx && ty && (tx - rx <= x && x <= tx + rx) && (ty - ry <= y && y <= ty + ry);
 	};
 	top.addEventListener('touchstart', touchStart, { passive: true });
-	top.addEventListener('touchend', cueResetCount, { passive: false });
+	top.addEventListener('touchend', touchEnd, { passive: false });
 	top.addEventListener('touchcancel', touchCancel, { passive: true });
 
 	function touchStart(e) {
@@ -75,26 +81,37 @@
 			let x = touch.pageX, y = touch.pageY;
 			if (++counter === 1) {
 				tapCoord = [x, y];
-			} else if (counter === 2) {
-				if (inRange(x, y)) {
-					counter = 0;
-					clearTimeout(timer);
+			} else {
+				if (counter === 2 && inRange(x, y)) {
 					dispatchMouseDown2(touch);
 					top.addEventListener('touchmove', dispatchMouseMove2, { once: false, passive: true });
 					top.addEventListener('touchend', dispatchMouseUp2, { once: true, passive: true });
 				}
+				resetCount();
 			}
 		} else {
 			touchCancel();
+			if (e.touches.length === 2) {
+				dispatchMouseDown2(e.touches[0]);
+				tap2Coord = new Map(Array.from(e.touches).map(t => [t.identifier, [t.screenX, t.screenY]]));
+				top.addEventListener('touchend', dispatchWheel, { once: true, passive: true });
+			}
 		}
 	}
-	function cueResetCount(e) {
+
+	function resetCount() {
+		clearTimeout(timer);
+		counter = 0;
+		if (arguments.length && 'click' in arguments[0]) {
+			arguments[0].click();
+		}
+	}
+	function touchEnd(e) {
 		if (!e.touches.length) {
 			let aElem = document.activeElement;
 			if (counter === 1
-				&& !(aElem instanceof HTMLInputElement)
-				&& !(aElem instanceof HTMLSelectElement)
 				&& !(aElem instanceof HTMLTextAreaElement)
+				&& !(aElem instanceof HTMLInputElement && ['email', 'number', 'password', 'search', 'tel', 'text', 'url'].includes(aElem.type))
 				&& !(aElem instanceof HTMLMediaElement && aElem.controls)
 			) {
 				e.preventDefault();
@@ -102,20 +119,14 @@
 			}
 			if (isSingleTap(e.changedTouches[0])) {
 				e.target.focus();
-				timer = setTimeout(target => {
-					counter = 0;
-					target.click();
-				}, duration, e.target);
+				timer = setTimeout(resetCount, duration, e.target);
 			} else {
-				timer = setTimeout(() => {
-					counter = 0;
-				}, duration);
+				timer = setTimeout(resetCount, duration);
 			}
 		}
 	}
 	function touchCancel() {
-		counter = 0;
-		clearTimeout(timer);
+		resetCount();
 		top.removeEventListener('touchmove', dispatchMouseMove2);
 		top.removeEventListener('touchend', dispatchMouseUp2);
 		if (eventTarget !== top) {
@@ -126,8 +137,9 @@
 		// set viewport
 		meta.content = viewport.fixed;
 
-		let closest = touch.target.closest('[href]');
+		let closest = touch.target.closest('a[href],area[href]');
 		top.postMessage({
+			button: 2,
 			href: closest ? closest.href : null,
 			origin: EXT_URL,
 			screenX: touch.screenX,
@@ -164,5 +176,30 @@
 			screenX: touch.screenX,
 			screenY: touch.screenY,
 		}));
+	}
+	function dispatchWheel(e) {
+		let touches;
+		if (e.touches.length === 1 && e.changedTouches.length === 1) {
+			touches = [e.touches[0], e.changedTouches[0]];
+		} else if (e.touches.length === 0 && e.changedTouches === 2) {
+			touches = Array.from(e.changedTouches);
+		}
+		if (touches) {
+			let startCoords = touches.map(t => tap2Coord.get(t.identifier));
+			let diffYs = touches.map((t, i) => startCoords[i][1] - t.screenY);
+			let absDiffYs = diffYs.map(Math.abs);
+			let maxAbs = Math.max.apply(null, absDiffYs);
+			let minAbs = Math.min.apply(null, absDiffYs);
+			let diff2 = diffYs[0] - diffYs[1];
+			if (minAbs >= wheelMoving && maxAbs - minAbs < margin) {
+				let direction = Math.sign(diff2);
+				top.dispatchEvent(new WheelEvent('wheel', {
+					deltaX: 0,
+					deltaY: minDelta * direction,
+					screenX: touches[0].screenX,
+					screenY: touches[0].screenY,
+				}));
+			}
+		}
 	}
 })();

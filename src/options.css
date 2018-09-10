@@ -151,18 +151,18 @@ a:focus {
 	opacity: .4;
 }
 button {
-	background: var(--grey-90-a10);
 	border: 0;
 	border-radius: 2px;
 	color: var(--grey-90);
 	cursor: pointer;
 	font: 400 13px var(--sansserif);
-	height: 32px;
+	min-height: 32px;
 	padding: 0 8px;
 }
 button.micro, .message button {
-	height: 24px;
 	font-size: 11px;
+	height: auto;
+	min-height: 24px;
 }
 button.puffy {
 	border-radius: 4px;
@@ -170,7 +170,13 @@ button.puffy {
 	height: 48px;
 	padding: 0 16px;
 }
-button:hover {
+button.ghost {
+	background: transparent;
+}
+button, button.ghost:hover {
+	background: var(--grey-90-a10);
+}
+button:hover, button.ghost:active {
 	background: var(--grey-90-a20);
 }
 button:active {
@@ -245,7 +251,7 @@ label {
 }
 .message {
 	align-items: center;
-	background: var(--grey-20) var(--icon-identity_icon) no-repeat 8px center/16px;
+	background: var(--grey-20) /* var(--icon-identity_icon) no-repeat 8px center/16px */;
 	border-radius: 4px;
 	color: var(--grey-90);
 	cursor: default;
@@ -254,10 +260,25 @@ label {
 	font-size: 13px;
 	max-width: 100%;
 	min-height: 32px;
-	padding: 4px 4px 4px 28px;
+	padding: 4px/* 4px 4px 28px*/;
 	position: relative;
-	transition-timing-function: var(--ease);
 	z-index: 1;
+}
+[data-icon]::before,
+.message > :first-child::before {
+	content: "";
+	display: inline-block;
+	height: 16px;
+	min-width: 16px;
+	vertical-align: text-bottom;
+	width: 16px;
+}
+[data-icon="indentity"]::before,
+.message > :first-child::before {
+	background: var(--icon-identity_icon) no-repeat center/16px;
+}
+.message > :first-child::before {
+	margin-right: 4px;
 }
 .message.runin {
 	display: inline-flex;
@@ -270,7 +291,7 @@ label {
 .message.inline {
 	display: inline-flex;
 	opacity: 0;
-	transition: opacity .3s;
+	transition: opacity .3s var(--ease);
 }
 .message.inline.nofocus, .message.inline:focus-within {
 	opacity: 1;
@@ -280,7 +301,7 @@ label {
 	margin: 16px;
 	position: fixed;
 	transform: translateY(80px);
-	transition: transform .3s;
+	transition: transform .3s var(--ease);
 }
 .message.bottom.nofocus, .message.bottom:focus-within {
 	transform: translateY(0);
@@ -289,11 +310,17 @@ label {
 	margin: 0 4px;
 }
 .message > span {
+	align-items: center;
+	display: inline-flex;
 	flex: 1 0 0;
 }
 .message.success {
-	background: var(--green-50) var(--icon-check-green) no-repeat 8px center/16px;
+	background: var(--green-50);
 	color: var(--green-90);
+}
+[data-icon="check-green"]::before,
+.message.success > :first-child::before {
+	background: var(--icon-check-green) no-repeat center/16px;
 }
 .message.success > button {
 	background: var(--green-60);
@@ -308,8 +335,12 @@ label {
 	color: var(--white);
 }
 .message.warning {
-	background: var(--yellow-50) var(--icon-warning) no-repeat 8px center/16px;
+	background: var(--yellow-50);
 	color: var(--yellow-90);
+}
+[data-icon="warning"]::before,
+.message.warning > :first-child::before {
+	background: var(--icon-warning) no-repeat center/16px;
 }
 .message.warning > button {
 	background: var(--yellow-60);
@@ -348,6 +379,10 @@ body > * {
 [data-i18n] {
 	white-space: pre-line;
 }
+[data-os="android"]:root .android-hidden,
+:not([data-os="android"]):root .android-only {
+	display: none;
+}
 .center {
 	margin: 0 auto;
 }
@@ -378,6 +413,12 @@ body > * {
 }
 .dialog-opened .dialog:not(:focus-within) {
 	opacity: 0;
+}
+.dialog .message > button {
+	flex: 0 1 6em;
+}
+.dialog .message > button.close {
+	flex: 0 1 24px;
 }
 a:not([href]), a[href^="#"] {
 	color: var(--grey-90);
@@ -417,6 +458,7 @@ dt {
 dd {
 	display: inline;
 	margin: 0;
+	padding-left: .5em;
 }
 dd::after {
 	content: '';
@@ -424,7 +466,6 @@ dd::after {
 }
 dd > label {
 	display: inline;
-	padding-left: 1em;
 }
 small {
 	font: var(--body-10);
@@ -470,14 +511,17 @@ nav {
 	width: 16rem;
 	z-index: 3;
 }
-#overlay {
-	background: var(--grey-90-a40);
-	display: none;
+[id$="overlay"] {
 	height: 100%;
 	left: 0;
+	padding: 0;
 	position: fixed;
 	top: 0;
 	width: 100%;
+}
+#overlay {
+	background: var(--grey-90-a40);
+	display: none;
 	z-index: 2;
 }
 @media screen and (max-width: 60em) {
@@ -595,6 +639,9 @@ th {
 	background: var(--grey-20);
 	word-break: keep-all;
 }
+th > [data-icon] {
+	display: block;
+}
 td > div {
 	align-items: center;
 	display: flex;
@@ -624,4 +671,10 @@ button.flex-min {
 #about h1 {
 	cursor: default;
 	font: var(--display-20);
+}
+
+/* Locus */
+canvas {
+	height: 100%;
+	width: 100%;
 }

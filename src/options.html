@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <meta charset=utf-8>
 <title>Opera Gestures</title>
+<link rel=icon href=icon.svg type=image/xml+svg>
 <link rel=license href=http://mozilla.org/MPL/2.0/ >
 <link rel=stylesheet href=options.css>
 <meta name=viewport content=width=device-width,initial-scale=1>
@@ -102,42 +103,42 @@
 				<table>
 					<caption data-i18n=functions-table_caption>List of Functions (*: Extra)</caption>
 					<tr>
-						<th><span data-i18n=left>left</span>
+						<th><span data-i18n=left>Left</span>
 						<td>
 							<label>
 								<input name=l type=checkbox>
 								<span data-i18n=functions-description-left>Go to previous page in history</span>
 							</label>
 					<tr>
-						<th><span data-i18n=right>right</span>
+						<th><span data-i18n=right>Right</span>
 						<td>
 							<label>
 								<input name=r type=checkbox>
 								<span data-i18n=functions-description-right>Go to next page in history</span>
 							</label>
 					<tr>
-						<th><span data-i18n=up>up</span>→<span data-i18n=left>left</span>
+						<th><span data-i18n=up>Up</span><wbr>→<span data-i18n=left>Left</span>
 						<td>
 							<label>
 								<input name=ul type=checkbox>
 								<span data-i18n=functions-description-upleft>Go to parent directory</span>
 							</label>
 					<tr>
-						<th><span data-i18n=up>up</span>→<span data-i18n=down>down</span>
+						<th><span data-i18n=up>Up</span><wbr>→<span data-i18n=down>Down</span>
 						<td>
 							<label>
 								<input name=ud type=checkbox>
 								<span data-i18n=functions-description-updown>Refresh page</span>
 							</label>
 					<tr>
-						<th><span data-i18n=up>up</span>
+						<th><span data-i18n=up>Up</span>
 						<td>
 							<label>
 								<input name=u type=checkbox>
 								<span data-i18n=functions-description-up>Stop loading</span>
 							</label>
 					<tr>
-						<th><span data-i18n=down>down</span>
+						<th><span data-i18n=down>Down</span><span class=android-only data-icon=indentity></span>
 						<td>
 							<div>
 								<input id=checkD name=d type=checkbox>
@@ -149,7 +150,7 @@
 								</dl>
 							</div>
 					<tr>
-						<th><span data-i18n=down>down</span>→<span data-i18n=up>up</span>
+						<th><span data-i18n=down>Down</span><wbr>→<span data-i18n=up>Up</span><span class=android-only data-icon=indentity></span>
 						<td>
 							<div>
 								<input id=checkDU name=du type=checkbox>
@@ -161,50 +162,55 @@
 								</dl>
 							</div>
 					<tr>
-						<th><span data-i18n=wheel>wheel</span><br>(<span data-i18n=up>up</span>/<span data-i18n=down>down</span>)
+						<th><span data-i18n=wheel>Wheel</span><br>(<span data-i18n=up>up</span>/<span data-i18n=down>down</span>)
 						<td>
 							<label class=nest-parent>
 								<input name=w type=checkbox>
 								<span data-i18n=functions-description-wheel>Switch active tab to the left/right one</span>
 							</label>
-							<fieldset class=nest-child form=fe>
+							<fieldset class="nest-child android-hidden" form=fe>
 								<label>
 									<input name=w1 type=checkbox form=fe>
 									<span data-i18n=functions-wheel_skip>Skip a tab that gestures don't work</span>
 								</label>
 								<div class="message warning">
-									<span data-i18n=warning_wheel_skip>Cannot skip a tab that is discarded or not yet loaded.</span>
+									<span id=warning-wheel_skip data-i18n=warning_wheel_skip>Cannot skip a tab that is discarded or not yet loaded.</span>
 								</div>
 							</fieldset>
 					<tr>
-						<th><span data-i18n=down>down</span>→<span data-i18n=right>right</span>
+						<th><span data-i18n=down>Down</span><wbr>→<span data-i18n=right>Right</span>
 						<td>
 							<label>
 								<input name=dr type=checkbox>
 								<span data-i18n=functions-description-downright>Close current tab</span>
 							</label>
-					<tr>
-						<th><span data-i18n=down>down</span>→<span data-i18n=left>left</span>
+					<tr class=android-hidden>
+						<th><span data-i18n=down>Down</span><wbr>→<span data-i18n=left>Left</span>
 						<td>
 							<label>
 								<input name=dl type=checkbox>
 								<span data-i18n=functions-description-downleft>Minimize window</span>
 							</label>
-					<tr>
-						<th><span data-i18n=up>up</span>→<span data-i18n=right>right</span>
+					<tr class=android-hidden>
+						<th><span data-i18n=up>Up</span><wbr>→<span data-i18n=right>Right</span>
 						<td>
 							<label>
 								<input name=ur type=checkbox>
 								<span data-i18n=functions-description-upright>Maximize window</span>
 							</label>
-					<tr>
-						<th><span data-i18n=right>right</span>→<span data-i18n=up>up</span>*
+					<tr class=android-hidden>
+						<th><span data-i18n=right>Right</span><wbr>→<span data-i18n=up>Up</span>*
 						<td>
 							<label>
 								<input name=ru type=checkbox form=fe>
 								<span data-i18n=functions-description-rightup>Restore recently closed tab/window</span>
 							</label>
 				</table>
+				<div class="message-container android-only">
+					<div class="message runin">
+						<span data-i18n=warning_newtab_android>On Android, the gestures [Down] and [Down→Up] open always a normal tab (not private).&#xa;In addition, the gesture [Down w/o link] opens a new tab with blank page (not homepage).</span>
+					</div>
+				</div>
 				<button class="primary puffy" data-i18n=button_save>Save</button>
 				<div class="message warning runin">
 					<span data-i18n=warning_required_restart>Require to restart add-on.</span>
@@ -276,11 +282,17 @@
 				<br>
 				<label class=nest-parent>
 					<input name=touch type=checkbox>
-					<span data-i18n=touch-emulate>Emulate gestures by touch (beta)</span>
+					<span data-i18n=touch-emulate>Emulate gestures by touch</span>
 				</label>
 				<fieldset class=nest-child>
 					<div class="message runin">
-						<span data-i18n=touch-description>Detecting starts with a double tap.</span>
+						<span></span>
+						<dl>
+							<dt><span data-i18n=touch-gesture-basic>Basic/Link Gestures</span>
+							<dd><span data-i18n=touch-description-basic>Double tap + Swipe</span>
+							<dt><span data-i18n=touch-gesture-wheel>Wheel Gestures</span>
+							<dd><span data-i18n=touch-description-wheel>Swipe up/down with 2 fingers</span>
+						</dl>
 					</div>
 					<label>
 						<span data-i18n=touch-duration_doubletap>Duration detecting a double tap</span>

@@ -92,6 +92,9 @@
 	"warning_restart_addon": {
 		"message": "お使いのブラウザバージョンでは自動でアドオンを再起動できません。\n変更を適用するには、アドオンまたはブラウザ再起動後にそれぞれのタブを手動で再読込してください。"
 	},
+	"warning_newtab_android": {
+		"message": "Androidでは、新しいタブは常にプライベートでない通常のタブとして開かれます。\nまた、リンク先が未指定の場合はホームページでなく空白ページが開かれます。"
+	},
 	"warning_wheel_skip": {
 		"message": "読み込まれていないタブはスキップできません。"
 	},
@@ -191,8 +194,17 @@
 	"touch-emulate": {
 		"message": "ジェスチャー機能をタッチでエミュレートする"
 	},
-	"touch-description": {
-		"message": "ダブルタップで認識を開始します。"
+	"touch-gesture-basic": {
+		"message": "基本/リンクジェスチャー"
+	},
+	"touch-description-basic": {
+		"message": "ダブルタップ+スワイプ"
+	},
+	"touch-gesture-wheel": {
+		"message": "ホイールジェスチャー"
+	},
+	"touch-description-wheel": {
+		"message": "2本指で上下にスワイプ"
 	},
 	"touch-duration_doubletap": {
 		"message": "ダブルタップの認識時間"

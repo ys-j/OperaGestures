@@ -7,10 +7,14 @@
 	const EXT_URL = browser.runtime.getURL('/');
 	let first = true;
 	let startX = -1, startY = -1;
+
+	function preventDefault(e) {
+		e.preventDefault();
+	}
 	
 	self.addEventListener('mousedown', e => {
 		if (e.button === 2) {
-			let closest = e.target.closest('[href]');
+			let closest = e.target.closest('a[href],area[href]');
 			top.postMessage({
 				href: closest ? closest.href : null,
 				origin: EXT_URL,
@@ -20,8 +24,8 @@
 		}
 	}, false);
 	self.addEventListener('contextmenu', e => {
-		if (!first || (startX !== e.screenX || startY !== e.screenY)) {
-			e.preventDefault();
+		if (!first || (startX !== -1 && startX !== e.screenX) || (startY !== -1 && startY !== e.screenY)) {
+			preventDefault(e);
 		}
 	}, false);
 
@@ -144,12 +148,14 @@
 			startX = -1, startY = -1;
 			self.addEventListener('wheel', onwheel, { once: false, passive: false });
 			self.addEventListener('mouseup', onmouseup, { once: true, passive: true });
+			self.addEventListener('contextmenu', preventDefault, { once: true });
 		}],
 		['leave', () => {
 			overlay.hidden = true;
 			self.removeEventListener('mousemove', checkstate);
 			self.removeEventListener('wheel', onwheel);
 			self.removeEventListener('mouseup', onmouseup);
+			self.removeEventListener('contextmenu', preventDefault);
 		}],
 	]);
 	port.onMessage.addListener(m => {

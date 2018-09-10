@@ -10,11 +10,11 @@
 	const RATIO = window.devicePixelRatio || 1;
 
 	let overlay = document.getElementById(ID_PREFIX + 'overlay');
-	let style = document.createElement('style');
 	let canvas = document.createElement('canvas');
-	canvas.setAttribute('id', ID_PREFIX + 'canvas');
+	canvas.id = ID_PREFIX + 'canvas';
+	canvas.style.height = '100%';
+	canvas.style.width = '100%';
 
-	overlay.appendChild(style);
 	overlay.appendChild(canvas);
 
 	let ctx = canvas.getContext('2d');
@@ -37,7 +37,7 @@
 		Object.entries(userStyle).forEach(a => {
 			styleMap.set(a[0], a[1]);	// overwrite style
 		});
-		style.innerText = '#' + ID_PREFIX + 'canvas{height:100%;width:100%;opacity:' + (v && v.locus.opacity || .5 ) + '}';
+		canvas.style.opacity = v && v.locus.opacity || .5;
 		updateCanvasSize();
 	});
 

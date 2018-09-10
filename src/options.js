@@ -5,6 +5,7 @@
  (function () {
 	'use strict';
 	const EXT_MANIFEST = browser.runtime.getManifest();
+	const EXT_URL = browser.runtime.getURL('/');
 
 	let vars = {};
 	let s = document.forms.s;	// sensibility
@@ -58,10 +59,10 @@
 	function toggleNav() {
 		document.body.classList.toggle('nav-opened');
 	}
-	let btn = document.getElementById('menu');
-	let overlay = document.getElementById('overlay');
-	btn.onclick = toggleNav;
-	overlay.onclick = toggleNav;
+	let btnMenu = document.getElementById('menu');
+	let overlayMenu = document.getElementById('overlay');
+	btnMenu.onclick = toggleNav;
+	overlayMenu.onclick = toggleNav;
 
 	function openSection() {
 		let hash = location.hash;
@@ -83,6 +84,13 @@
 		Array.from(pop.getElementsByTagName('button')).forEach(btn => {
 			btn.onmousedown = e => e.preventDefault();
 		})
+	});
+	document.querySelectorAll('button[data-message-for]').forEach(btn => {
+		let target = document.getElementById(btn.dataset.messageFor);
+		btn.onclick = () => {
+			target.focus();
+			return false;
+		};
 	});
 
 	// update svg
@@ -120,7 +128,7 @@
 		const INITIAL = {
 			config: { mm1: 32, mm2: 16, ar: 30, wm: 4 },
 			locus: { style: { strokeStyle: '#30e60b', lineWidth: 3 }, opacity: 0.5, themecolor: false },
-			touch: { duration: 300, margin: 32 },
+			touch: { duration: 200, margin: 32 },
 			gesture: { basic: 2047 , extra: 0 },
 			blacklist: [],
 		};
@@ -175,6 +183,24 @@
 		g.touch.onchange = updateNestedCheckboxes;
 		
 		updateNestedCheckboxes();
+		return Promise.resolve(config);
+	}).then((cfg) => {
+		// for preview
+		if (cfg.locus) {
+			let script = document.createElement('script');
+			script.src = 'locus.js';
+			document.body.appendChild(script);
+		}
+		if (cfg.touch) {
+			let script = document.createElement('script');
+			script.src = 'touch.js';
+			document.body.appendChild(script);
+			window.addEventListener('message', e => {
+				if (e.data.origin === EXT_URL) {
+					onmousedown(e.data);
+				}
+			}, false);
+		}
 	});
 
 	// reload extenison
@@ -313,6 +339,11 @@
 	// preview
 	let startX = 0, startY = 0;
 	let gestures = [];
+	let overlay = document.createElement('div');
+	overlay.id = EXT_URL.replace(/[/:-]+/g, '-') + 'overlay';
+	overlay.hidden = true;
+	overlay.style.zIndex = 0x7fffffff;
+	document.body.appendChild(overlay);
 
 	function checkstate(e) {
 		let diffX = e.screenX - startX, diffY = e.screenY - startY;
@@ -365,9 +396,11 @@
 		gestures = [];
 		startX = e.screenX, startY = e.screenY;
 		if (e.button === 2) {
+			overlay.hidden = false;
 			window.addEventListener('mousemove', checkstate, { once: false });
 			window.addEventListener('wheel', onwheel, { once: false });
 			window.addEventListener('mouseup', e => {
+				overlay.hidden = true;
 				gesture.value = gestures.length ? gestures.map(v => browser.i18n.getMessage(v) || v).join('→') : browser.i18n.getMessage('rightclick');
 				gesture.parentElement.hidden = false;
 				gesture.parentElement.focus();
