@@ -65,10 +65,9 @@
 	overlayMenu.onclick = toggleNav;
 
 	function openSection() {
-		let hash = location.hash;
-		if (hash) {
-			document.body.className = hash.substr(1)  + '-opened';
-		}
+		let hash = location.hash || '#about';
+		document.body.className = hash.substr(1)  + '-opened';
+		location.hash = hash;
 	}
 	window.onhashchange = openSection;
 	window.onload = openSection;

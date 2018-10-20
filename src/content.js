@@ -64,8 +64,56 @@
 	overlay.style.top = 0;
 	overlay.style.zIndex = 0x7fffffff;
 	document.addEventListener('DOMContentLoaded', () => {
+		if (document.body.nodeName.toLowerCase() === 'frameset') {
+			let body = document.createElement('body');
+			document.body = frameset2div(document.body, body);
+		}
 		document.body.appendChild(overlay);
 	});
+	function frameset2div(frameset, wrapper) {
+		let styleGrid = attr => attr ? attr.split(',').map(v => v.replace(/(\d*)(\D*)/, (_, p1, p2) => (p1 || '1') + (p2 ? p2 === '*' ? 'fr' : p2 : 'px'))).join(' ') : '';
+		if (!wrapper) {
+			wrapper = document.createElement('div');
+		}
+		wrapper.style.display = 'grid';
+		wrapper.style.height = '100%';
+		wrapper.style.width = '100%';
+		wrapper.style.margin = 0;
+		const STYLE_NAMES = ['gridTemplateColumns', 'gridTemplateRows'];
+		['cols', 'rows'].forEach((v, i) => {
+			wrapper.style[STYLE_NAMES[i]] = styleGrid(frameset.getAttribute(v));
+		});
+		let frameborder = frameset.getAttribute('frameborder')  || '';
+		if (frameborder) {
+			wrapper.dataset.frameBorder = frameborder;
+			let style = document.createElement('style');
+			style.textContent = '[data-frame-border] iframe{border:' + (isNaN(frameborder) ? 'inherit}' : frameborder + 'px}');
+			wrapper.appendChild(style);
+		}
+		
+		const NEW_ELEMENT_TEMPLATE = {
+			frame: document.createElement('iframe'),
+			frameset: document.createElement('div'),
+		};
+		Array.from(frameset.children).forEach(child => {
+			let newnode;
+			let nodeName = child.nodeName.toLowerCase();
+			if (nodeName in NEW_ELEMENT_TEMPLATE) {
+				let newelem = NEW_ELEMENT_TEMPLATE[nodeName].cloneNode();
+				Array.from(child.attributes).forEach(attr => {
+					newelem.setAttribute(attr.name, attr.value);
+				});
+				if (frameborder) {
+					newelem.dataset.frameBorder = frameborder;
+				}
+				newnode = nodeName === 'frameset' ? frameset2div(child, newelem) : newelem;
+			} else {
+				newnode = document.createComment('<noframes>' + child.innerHTML + '</noframes>');
+			}
+			wrapper.appendChild(newnode);
+		});
+		return wrapper;
+	}
 
 	// main
 	let port = browser.runtime.connect();

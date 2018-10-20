@@ -251,7 +251,7 @@ label {
 }
 .message {
 	align-items: center;
-	background: var(--grey-20) /* var(--icon-identity_icon) no-repeat 8px center/16px */;
+	background: var(--grey-20);
 	border-radius: 4px;
 	color: var(--grey-90);
 	cursor: default;
@@ -260,7 +260,7 @@ label {
 	font-size: 13px;
 	max-width: 100%;
 	min-height: 32px;
-	padding: 4px/* 4px 4px 28px*/;
+	padding: 4px;
 	position: relative;
 	z-index: 1;
 }
@@ -574,11 +574,7 @@ section {
 	display: none;
 	margin: 16px 0;
 }
-.sensibility-opened #sensibility,
-.functions-opened #functions,
-.blacklist-opened #blacklist,
-.beta-opened #beta,
-.about-opened #about {
+section:target {
 	display: block;
 }
 .sensibility-opened [href="#sensibility"],
