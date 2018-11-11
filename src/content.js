@@ -57,6 +57,7 @@
 	let overlay = document.createElement('div');
 	overlay.id = EXT_URL.replace(/[/:-]+/g, '-') + 'overlay';
 	overlay.hidden = true;
+	overlay.style.display = 'none';
 	overlay.style.position = 'fixed';
 	overlay.style.height = '100%';
 	overlay.style.width = '100%';
@@ -167,6 +168,7 @@
 	function onmouseup(e) {
 		if (e.button === 2) {
 			overlay.hidden = true;
+			overlay.style.display = 'none';
 			port.postMessage({ execute: true, url: href });
 			self.removeEventListener('mousemove', checkstate);
 			self.removeEventListener('wheel', onwheel);
@@ -176,6 +178,7 @@
 	self.addEventListener('message', e => {
 		if (e.data.origin === EXT_URL) {
 			overlay.hidden = false;
+			overlay.style.display = 'block';
 			first = true;
 			startX = e.data.screenX, startY = e.data.screenY;
 			href = e.data.href;
@@ -193,6 +196,7 @@
 		['up,down', () => { location.reload(); }],
 		['enter', () => {
 			overlay.hidden = false;
+			overlay.style.display = 'block';
 			startX = -1, startY = -1;
 			self.addEventListener('wheel', onwheel, { once: false, passive: false });
 			self.addEventListener('mouseup', onmouseup, { once: true, passive: true });
@@ -200,6 +204,7 @@
 		}],
 		['leave', () => {
 			overlay.hidden = true;
+			overlay.style.display = 'none';
 			self.removeEventListener('mousemove', checkstate);
 			self.removeEventListener('wheel', onwheel);
 			self.removeEventListener('mouseup', onmouseup);
