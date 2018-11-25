@@ -379,6 +379,7 @@ body > * {
 [data-i18n] {
 	white-space: pre-line;
 }
+[data-os="win"]:root .win-hidden,
 [data-os="android"]:root .android-hidden,
 :not([data-os="android"]):root .android-only {
 	display: none;
@@ -387,14 +388,14 @@ body > * {
 	margin: 0 auto;
 }
 .flex {
-	align-items: stretch;
+	align-items: center;
 	display: flex;
 	flex-flow: row wrap;
 }
 .flex > :not(:last-child) {
 	margin-right: 16px;
 }
-.dialog {
+#dialog {
 	background: var(--grey-90-a40);
 	display: none;
 	height: 100%;
@@ -405,19 +406,19 @@ body > * {
 	width: 100%;
 	z-index: 3;
 }
-.dialog-opened .dialog {
+.dialog-opened #dialog {
 	align-items: center;
 	display: flex;
 	justify-content: center;
 	opacity: 1;
 }
-.dialog-opened .dialog:not(:focus-within) {
+.dialog-opened #dialog:not(:focus-within) {
 	opacity: 0;
 }
-.dialog .message > button {
+#dialog .message > button {
 	flex: 0 1 6em;
 }
-.dialog .message > button.close {
+#dialog .message > button.close {
 	flex: 0 1 24px;
 }
 a:not([href]), a[href^="#"] {
@@ -581,6 +582,7 @@ section:target {
 .functions-opened [href="#functions"],
 .blacklist-opened [href="#blacklist"],
 .beta-opened [href="#beta"],
+.mac_linux-opened [href="#mac_linux"],
 .about-opened [href="#about"] {
 	cursor: default;
 	color: var(--blue-60);
@@ -667,6 +669,9 @@ button.flex-min {
 #about h1 {
 	cursor: default;
 	font: var(--display-20);
+}
+.message ol {
+	margin: 0;
 }
 
 /* Locus */

@@ -20,6 +20,9 @@
 	"blacklist": {
 		"message": "除外リスト"
 	},
+	"maclinux": {
+		"message": "For Mac/Linux"
+	},
 	"help": {
 		"message": "ヘルプ"
 	},
@@ -89,6 +92,9 @@
 	"warning_required_restart": {
 		"message": "適用するにはアドオンの再起動が必要です。"
 	},
+	"warning_required_permission": {
+		"message": "適用するには追加権限の許可が必要です。"
+	},
 	"warning_restart_addon": {
 		"message": "お使いのブラウザバージョンでは自動でアドオンを再起動できません。\n変更を適用するには、アドオンまたはブラウザ再起動後にそれぞれのタブを手動で再読込してください。"
 	},
@@ -97,6 +103,9 @@
 	},
 	"warning_wheel_skip": {
 		"message": "読み込まれていないタブはスキップできません。"
+	},
+	"warning_modify_config_manually": {
+		"message": "ブラウザ設定を変更する権限を取得できませんでした。\n次の手順でブラウザ設定を変更してください。"
 	},
 	"notification-oninstalled": {
 		"message": "インストールありがとうございます！\nクリックで設定画面を開きます。"
@@ -211,6 +220,15 @@
 	},
 	"touch-margin_doubletap": {
 		"message": "ダブルタップの許容誤差"
+	},
+	"macliunx-change_contextmenu_behavior": {
+		"message": "コンテキストメニューが開かれるタイミングを変更する"
+	},
+	"maclinux-process1": {
+		"message": "about:configを開く"
+	},
+	"maclinux-process2": {
+		"message": "ui.context_menus.after_mouseupの値をtrueに変更する"
 	},
 	"about-description-AMO": {
 		"message": "評価・レビュー"

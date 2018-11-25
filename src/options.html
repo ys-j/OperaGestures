@@ -21,6 +21,7 @@
 					<li><a href=#functions data-i18n=functions>Functions</a>
 					<li><a href=#blacklist data-i18n=blacklist>Blacklist</a>
 					<li><a href=#beta data-i18n=beta>Beta Features</a>
+					<li class=win-hidden><a href=#mac_linux data-i18n=maclinux>For Mac/Linux</a>
 				</ul>
 			<li>
 				<h2 data-i18n=help>Help</h2>
@@ -312,6 +313,18 @@
 				</div>
 			</form>
 		</section>
+		<section id=mac_linux role=tabpanel>
+			<h1 data-i18n=maclinux>For Mac/Linux</h1>
+			<form name=ml>
+				<label>
+					<input name=cm type=checkbox>
+					<span data-i18n=macliunx-change_contextmenu_behavior>Change the timing of context menu opening (mousedown to mouseup)</span>
+				</label>
+				<div class="message warning runin">
+					<span data-i18n=warning_required_permission>Require to allow optional permission.</span>
+				</div>
+			</form>
+		</section>
 		<section id=about role=tabpanel>
 			<h1>Thank you for using <i><img alt=O src=icon.svg>pera Gestures</i>!</h1>
 			<h2><i data-subst=name></i> v<span data-subst=version></span></h2>
@@ -333,10 +346,22 @@
 		</div>
 	</main>
 	<div id=overlay></div>
-	<div class=dialog tabindex=-1>
+	<div id=dialog tabindex=-1>
 		<div class="message warning inline" tabindex=-1 hidden>
 			<span data-i18n=warning_restart_addon>Cannot reload the add-on automatically on your browser version.&#xa;Please reload each tab manually to apply modification after restarting add-on or browser.</span>
 			<button type=button data-i18n=button_restart_addon>Restart add-on</button>
+			<button class=close></button>
+		</div>
+		<div class="message warning inline" tabindex=-1 hidden>
+			<div class=flex>
+				<div>
+					<span data-i18n=warning_modify_config_manually>Failed to get permission to modify browser settings.&#xa;Please modify browser setting manually:</span>
+					<ol>
+						<li data-i18n=maclinux-process1>Open "about:config".
+						<li data-i18n=maclinux-process2>Change "ui.context_menus.after_mouseup" value to true.
+					</ol>
+				</div>
+			</div>
 			<button class=close></button>
 		</div>
 	</div>

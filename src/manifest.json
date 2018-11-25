@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "Opera Gestures",
-	"version": "0.7b3",
+	"version": "0.7b4",
 	"applications": {
 		"gecko": {
 			"id": "{57466e58-d98e-457c-8b93-0b9bb6f3e0b0}",
@@ -17,6 +17,7 @@
 	"homepage_url": "https://github.com/ys0115/OperaGestures",
 	"default_locale": "en",
 	"permissions": ["*://*/", "notifications", "sessions", "storage"],
+	"optional_permissions": ["browserSettings"],
 	"icons": {
 		"48": "icon.svg",
 		"96": "icon.svg"

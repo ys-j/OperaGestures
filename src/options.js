@@ -14,13 +14,35 @@
 	let b = document.forms.b;	// blacklist (list)
 	let c = document.forms.c;	// blacklist (confirm)
 	let g = document.forms.g;	// beta features
+	let ml = document.forms.ml;	// for Mac/Linux
 	let fbc = Array.from(fb);
 	let gesture = document.getElementById('gesture');
 	let matchedPattern = document.getElementById('matchedPattern');
 	let svg = document.getElementsByTagName('svg');
-	let cc = svg[0].getElementById('_cc');
-	let tl = svg[0].getElementById('_tl');
-	let ml = svg[1].getElementById('_ml');
+
+	let _cc = svg[0].getElementById('_cc');
+	let _tl = svg[0].getElementById('_tl');
+	let _ml = svg[1].getElementById('_ml');
+
+	let dialog = document.getElementById('dialog');
+	let dialogMessages = Array.from(dialog.getElementsByClassName('message'));
+	function openDialog() {
+		document.body.classList.add('dialog-opened')
+		this.hidden = false;
+		this.onfocus = e => {
+			e.target.classList.add('nofocus');
+		};
+		this.focus();
+	}
+	function closeDialog() {
+		this.addEventListener('transitionend', () => {
+			document.body.classList.remove('dialog-opened')
+			this.hidden = true;
+		}, { once: true, passive: true });
+		this.focus();
+		this.classList.remove('nofocus');
+		this.blur();
+	}
 
 	// detect platform
 	(async function classifyHtml() {
@@ -100,12 +122,12 @@
 		vars.tan = Math.tan(vars.rad);
 		vars.wm = s.wm.value;
 		let ccv = (vars.mm1 / 20).toFixed(1);
-		cc.setAttribute('r', ccv);
+		_cc.setAttribute('r', ccv);
 		let cx = (8 * Math.cos(vars.rad)).toFixed(1);
 		let cy = (8 * Math.sin(vars.rad)).toFixed(1);
-		tl.setAttribute('d', `M0,0L${cx},${cy}A8,8,0,0,0,${cx},-${cy}z`);
+		_tl.setAttribute('d', `M0,0L${cx},${cy}A8,8,0,0,0,${cx},-${cy}z`);
 		let max = Math.max(vars.mm1, vars.mm2);
-		ml.setAttribute('d', `M2,2v${(vars.mm1/max*12-2).toFixed(1)}a2,2,0,0,0,2,2h${(vars.mm2/max*12-2).toFixed(1)}`);
+		_ml.setAttribute('d', `M2,2v${(vars.mm1/max*12-2).toFixed(1)}a2,2,0,0,0,2,2h${(vars.mm2/max*12-2).toFixed(1)}`);
 	}
 
 	// update nested checkboxes
@@ -212,32 +234,13 @@
 		};
 	} else {
 		// for Firefox 52, Android
-		let dialog = document.getElementsByClassName('dialog')[0];
-		let msgboxes = Array.from(dialog.getElementsByClassName('message'));
-		msgboxes.forEach(msgbox => {
-			let btns = msgbox.getElementsByTagName('button');
-			btns[0].onclick = () => {
-				browser.runtime.reload();
-			};
-			btns[1].onclick = () => {
-				msgbox.addEventListener('transitionend', () => {
-					document.body.classList.remove('dialog-opened')
-					msgbox.hidden = true;
-				}, { once: true, passive: true });
-				msgbox.focus();
-				msgbox.classList.remove('nofocus');
-				msgbox.blur();
-			};
-		});
-		reloadExtension = () => {
-			let msgbox = msgboxes[0];
-			document.body.classList.add('dialog-opened')
-			msgbox.hidden = false;
-			msgbox.onfocus = e => {
-				e.target.classList.add('nofocus');
-			};
-			msgbox.focus();
+		let msgbox = dialogMessages[0];
+		let btns = msgbox.getElementsByTagName('button');
+		btns[0].onclick = () => {
+			browser.runtime.reload();
 		};
+		btns[1].onclick = closeDialog.bind(msgbox);
+		reloadExtension = openDialog.bind(msgbox);
 	}
 
 	// save
@@ -333,6 +336,39 @@
 			popSaved.focus();
 		});
 		return false;
+	};
+
+	// modify browser setting
+	if (browser.browserSettings && 'contextMenuShowEvent' in browser.browserSettings) {
+		browser.browserSettings.contextMenuShowEvent.get({}).then(setting => {
+			ml.cm.checked = setting.value === 'mouseup';
+		});
+	}
+	ml.cm.onchange = async e => {
+		if (e.target.checked) {
+			try {
+				if (await browser.permissions.request({ permissions: ['browserSettings'] })) {
+					browser.browserSettings.contextMenuShowEvent.set({ value: 'mouseup' }).catch(err => {
+						throw err;
+					});
+				} else {
+					throw 'Permission denied';
+				}
+			} catch (err) {
+				console.warn(err);
+				e.target.checked = false;
+				let msgbox = dialogMessages[1];
+				msgbox.getElementsByTagName('button')[0].onclick = closeDialog.bind(msgbox);
+				openDialog.bind(msgbox)();
+			}
+		} else {
+			try {
+				e.target.checked = !(await browser.browserSettings.contextMenuShowEvent.clear({}));
+			} catch (err) {
+				console.warn(err);
+				e.target.checked = true;
+			}
+		}
 	};
 
 	// preview
