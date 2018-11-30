@@ -7,25 +7,25 @@
 	const EXT_MANIFEST = browser.runtime.getManifest();
 	const EXT_URL = browser.runtime.getURL('/');
 
-	let vars = {};
-	let s = document.forms.s;	// sensibility
-	let fb = document.forms.fb;	// functions (basic)
-	let fe = document.forms.fe;	// functions (extra)
-	let b = document.forms.b;	// blacklist (list)
-	let c = document.forms.c;	// blacklist (confirm)
-	let g = document.forms.g;	// beta features
-	let ml = document.forms.ml;	// for Mac/Linux
-	let fbc = Array.from(fb);
-	let gesture = document.getElementById('gesture');
-	let matchedPattern = document.getElementById('matchedPattern');
-	let svg = document.getElementsByTagName('svg');
+	const vars = {};
+	const s = document.forms.s;	// sensibility
+	const fb = document.forms.fb;	// functions (basic)
+	const fe = document.forms.fe;	// functions (extra)
+	const b = document.forms.b;	// blacklist (list)
+	const c = document.forms.c;	// blacklist (confirm)
+	const g = document.forms.g;	// beta features
+	const ml = document.forms.ml;	// for Mac/Linux
+	const fbc = Array.from(fb);
+	const gesture = document.getElementById('gesture');
+	const matchedPattern = document.getElementById('matchedPattern');
+	const svg = document.getElementsByTagName('svg');
 
-	let _cc = svg[0].getElementById('_cc');
-	let _tl = svg[0].getElementById('_tl');
-	let _ml = svg[1].getElementById('_ml');
+	const _cc = svg[0].getElementById('_cc');
+	const _tl = svg[0].getElementById('_tl');
+	const _ml = svg[1].getElementById('_ml');
 
-	let dialog = document.getElementById('dialog');
-	let dialogMessages = Array.from(dialog.getElementsByClassName('message'));
+	const dialog = document.getElementById('dialog');
+	const dialogMessages = Array.from(dialog.getElementsByClassName('message'));
 	function openDialog() {
 		document.body.classList.add('dialog-opened')
 		this.hidden = false;
@@ -46,31 +46,31 @@
 
 	// detect platform
 	(async function classifyHtml() {
-		let info = await browser.runtime.getPlatformInfo();
+		const info = await browser.runtime.getPlatformInfo();
 		document.documentElement.setAttribute('data-os', info.os);
 	})();
 
 	// substitute i18n, extension info
 	(function subst_i18n() {
-		let lang = browser.i18n.getUILanguage();
+		const lang = browser.i18n.getUILanguage();
 		document.documentElement.setAttribute('lang', lang === 'ja' ? 'ja' : 'en');
 		document.querySelectorAll('[data-i18n]').forEach(elem => {
-			let args = [];
+			const args = [];
 			for (let i = 1; i < 9; i++) {
-				let data = elem.dataset['i18n-$' + i];
+				const data = elem.dataset['i18n-$' + i];
 				if (data) {
 					args.push(data);
 				} else {
 					break;
 				}
 			}
-			let msg = browser.i18n.getMessage(elem.dataset.i18n, args);
+			const msg = browser.i18n.getMessage(elem.dataset.i18n, args);
 			if (msg && msg !== '??') {
 				elem.textContent = msg;
 			}
 		});
 		document.querySelectorAll('[data-subst]').forEach(elem => {
-			let msg = EXT_MANIFEST[elem.dataset.subst];
+			const msg = EXT_MANIFEST[elem.dataset.subst];
 			if (msg && typeof msg === 'string') {
 				elem.textContent = msg;
 			}
@@ -81,13 +81,13 @@
 	function toggleNav() {
 		document.body.classList.toggle('nav-opened');
 	}
-	let btnMenu = document.getElementById('menu');
-	let overlayMenu = document.getElementById('overlay');
+	const btnMenu = document.getElementById('menu');
+	const overlayMenu = document.getElementById('overlay');
 	btnMenu.onclick = toggleNav;
 	overlayMenu.onclick = toggleNav;
 
 	function openSection() {
-		let hash = location.hash || '#about';
+		const hash = location.hash || '#about';
 		document.body.className = hash.substr(1)  + '-opened';
 		location.hash = hash;
 	}
@@ -107,7 +107,7 @@
 		})
 	});
 	document.querySelectorAll('button[data-message-for]').forEach(btn => {
-		let target = document.getElementById(btn.dataset.messageFor);
+		const target = document.getElementById(btn.dataset.messageFor);
 		btn.onclick = () => {
 			target.focus();
 			return false;
@@ -121,12 +121,12 @@
 		vars.rad = s.ar.value / 360 * Math.PI;
 		vars.tan = Math.tan(vars.rad);
 		vars.wm = s.wm.value;
-		let ccv = (vars.mm1 / 20).toFixed(1);
+		const ccv = (vars.mm1 / 20).toFixed(1);
 		_cc.setAttribute('r', ccv);
-		let cx = (8 * Math.cos(vars.rad)).toFixed(1);
-		let cy = (8 * Math.sin(vars.rad)).toFixed(1);
+		const cx = (8 * Math.cos(vars.rad)).toFixed(1);
+		const cy = (8 * Math.sin(vars.rad)).toFixed(1);
 		_tl.setAttribute('d', `M0,0L${cx},${cy}A8,8,0,0,0,${cx},-${cy}z`);
-		let max = Math.max(vars.mm1, vars.mm2);
+		const max = Math.max(vars.mm1, vars.mm2);
 		_ml.setAttribute('d', `M2,2v${(vars.mm1/max*12-2).toFixed(1)}a2,2,0,0,0,2,2h${(vars.mm2/max*12-2).toFixed(1)}`);
 	}
 
@@ -154,7 +154,7 @@
 			blacklist: [],
 		};
 
-		let config = STORAGE.config || INITIAL.config;		
+		const config = STORAGE.config || INITIAL.config;		
 		s.mm1.value = config.mm1;
 		s.mm2.value = config.mm2;
 		s.ar.value = config.ar;
@@ -164,7 +164,7 @@
 		s.ar.onchange = updateSVG;
 		updateSVG();
 
-		let gesture = STORAGE.gesture || INITIAL.gesture;
+		const gesture = STORAGE.gesture || INITIAL.gesture;
 		fbc.forEach((elem, i) => {
 			elem.checked = gesture.basic & Math.pow(2, i);
 		});
@@ -182,10 +182,10 @@
 		fe.w1.checked = gesture.extra & 2;
 		fb.w.onchange = updateNestedCheckboxes;
 
-		let blacklist = STORAGE.blacklist || INITIAL.blacklist;
+		const blacklist = STORAGE.blacklist || INITIAL.blacklist;
 		b.ul.value = blacklist.join('\n');
 		
-		let locus = STORAGE.locus || INITIAL.locus;
+		const locus = STORAGE.locus || INITIAL.locus;
 		g.locus.checked = config.locus || false;
 		g.lt.value = locus.style.lineWidth;
 		g.lc.value = locus.style.strokeStyle;
@@ -197,7 +197,7 @@
 			g.lco.value = g.lc.value;
 		};
 
-		let touch = STORAGE.touch || INITIAL.touch;
+		const touch = STORAGE.touch || INITIAL.touch;
 		g.touch.checked = config.touch || false;
 		g.td.value = touch.duration * 0.001;
 		g.tm.value = touch.margin;
@@ -208,12 +208,12 @@
 	}).then((cfg) => {
 		// for preview
 		if (cfg.locus) {
-			let script = document.createElement('script');
+			const script = document.createElement('script');
 			script.src = 'locus.js';
 			document.body.appendChild(script);
 		}
 		if (cfg.touch) {
-			let script = document.createElement('script');
+			const script = document.createElement('script');
 			script.src = 'touch.js';
 			document.body.appendChild(script);
 			window.addEventListener('message', e => {
@@ -228,14 +228,14 @@
 	let reloadExtension;
 	if ('discard' in browser.tabs) {
 		reloadExtension = async () => {
-			let tabs = await browser.tabs.query({ discarded: false });
+			const tabs = await browser.tabs.query({ discarded: false });
 			await browser.tabs.discard(tabs.map(tab => tab.id));
 			browser.runtime.reload();
 		};
 	} else {
 		// for Firefox 52, Android
-		let msgbox = dialogMessages[0];
-		let btns = msgbox.getElementsByTagName('button');
+		const msgbox = dialogMessages[0];
+		const btns = msgbox.getElementsByTagName('button');
 		btns[0].onclick = () => {
 			browser.runtime.reload();
 		};
@@ -244,9 +244,9 @@
 	}
 
 	// save
-	let popSaved = document.getElementById('pop-saved');
+	const popSaved = document.getElementById('pop-saved');
 	popSaved.lastElementChild.onclick = reloadExtension;
-	let saveConfig = () => browser.storage.local.set({
+	const saveConfig = () => browser.storage.local.set({
 		version: EXT_MANIFEST.version,
 		config: {
 			locus: g.locus.checked,
@@ -289,7 +289,7 @@
 
 	// save blacklist
 	b.onsubmit = () => {
-		let v = b.ul.value.replace(/\\\//g, '/');
+		const v = b.ul.value.replace(/\\\//g, '/');
 		browser.storage.local.set({
 			version: EXT_MANIFEST.version,
 			blacklist: v ? v.split('\n').filter(s => s.length) : [],
@@ -303,9 +303,9 @@
 	// check blacklist
 	c.onsubmit = () => {
 		b.ul.value = b.ul.value.replace(/\\\//g, '/');
-		let rawList = (b.dl.value + '\n' + b.ul.value).split('\n').filter(s => s.length);
-		let reList = rawList.map(s => new RegExp(s));
-		let matched = reList.filter(re => re.test(c.url.value)).map(re => re.source.replace(/\\\//g, '/'));
+		const rawList = (b.dl.value + '\n' + b.ul.value).split('\n').filter(s => s.length);
+		const reList = rawList.map(s => new RegExp(s));
+		const matched = reList.filter(re => re.test(c.url.value)).map(re => re.source.replace(/\\\//g, '/'));
 		if (matched.length) {
 			matchedPattern.value = matched.join('\n');
 		} else {
@@ -317,25 +317,36 @@
 	};
 
 	// save beta features
-	g.onsubmit = () => {
-		saveConfig().then(() => browser.storage.local.set({
-			locus: {
-				style: {
-					lineWidth: g.lt.value | 0,
-					strokeStyle: g.lc.value,
-				},
-				opacity: g.lo.value * 0.01,
-				themecolor: g.lptc.checked,
-			},
-			touch: {
-				duration: g.td.value * 1000,
-				margin: g.tm.value | 0,
-			},
-		})).then(() => {
-			popSaved.hidden = false;
-			popSaved.focus();
-		});
-		return false;
+	g.onsubmit = async e => {
+		e.preventDefault();
+		saveConfig();
+		if (g.locus.checked || g.touch.checked) {
+			try {
+				if (await browser.permissions.request({ origins: ['<all_urls>'] })) {
+					await browser.storage.local.set({
+						locus: {
+							style: {
+								lineWidth: g.lt.value | 0,
+								strokeStyle: g.lc.value,
+							},
+							opacity: g.lo.value * 0.01,
+							themecolor: g.lptc.checked,
+						},
+						touch: {
+							duration: g.td.value * 1000,
+							margin: g.tm.value | 0,
+						},
+					});
+				} else {
+					throw 'Permission denied: <all_urls>';
+				}
+			} catch (err) {
+				console.warn(err);
+				return false;
+			}
+		}
+		popSaved.hidden = false;
+		popSaved.focus();
 	};
 
 	// modify browser setting
@@ -352,12 +363,12 @@
 						throw err;
 					});
 				} else {
-					throw 'Permission denied';
+					throw 'Permission denied: browserSettings';
 				}
 			} catch (err) {
 				console.warn(err);
 				e.target.checked = false;
-				let msgbox = dialogMessages[1];
+				const msgbox = dialogMessages[1];
 				msgbox.getElementsByTagName('button')[0].onclick = closeDialog.bind(msgbox);
 				openDialog.bind(msgbox)();
 			}
@@ -374,16 +385,16 @@
 	// preview
 	let startX = 0, startY = 0;
 	let gestures = [];
-	let overlay = document.createElement('div');
+	const overlay = document.createElement('div');
 	overlay.id = EXT_URL.replace(/[/:-]+/g, '-') + 'overlay';
 	overlay.hidden = true;
 	overlay.style.zIndex = 0x7fffffff;
 	document.body.appendChild(overlay);
 
 	function checkstate(e) {
-		let diffX = e.screenX - startX, diffY = e.screenY - startY;
-		let absX = Math.abs(diffX), absY = Math.abs(diffY);
-		let min = gestures.length ? vars.mm2 : vars.mm1;
+		const diffX = e.screenX - startX, diffY = e.screenY - startY;
+		const absX = Math.abs(diffX), absY = Math.abs(diffY);
+		const min = gestures.length ? vars.mm2 : vars.mm1;
 
 		if (min < absX || min < absY) {			
 			let state;

@@ -8,13 +8,13 @@
 	const ID_PREFIX = EXT_URL.replace(/[/:-]+/g, '-');
 
 	// get <meta name=viewport>
-	let viewport = {};
+	const viewport = {};
 	let meta = document.head.querySelector('meta[name="viewport"]');
 	if (meta) {
 		viewport.initial = meta.content || '';
 		viewport.fixed = viewport.initial + ',user-scalable=no';
 	} else {
-		let observer = new MutationObserver(records => {
+		const observer = new MutationObserver(records => {
 			loop:
 			for (let record of records) {
 				for (let node of record.addedNodes) {
@@ -61,11 +61,11 @@
 	let timer;
 	let counter = 0;
 	let tapCoord = [], tap2Coord = new Map();
-	let inRange = (x, y) => {
+	const inRange = (x, y) => {
 		let tx = tapCoord[0], ty = tapCoord[1];
 		return tx && ty && (tx - margin <= x && x <= tx + margin) && (ty - margin <= y && y <= ty + margin);
 	};
-	let isSingleTap = touch => {
+	const isSingleTap = touch => {
 		let x = touch.pageX, y = touch.pageY;
 		let rx = touch.radiusX, ry = touch.radiusY;
 		let tx = tapCoord[0], ty = tapCoord[1];
@@ -77,8 +77,8 @@
 
 	function touchStart(e) {
 		if (e.touches.length === 1) {
-			let touch = e.touches[0];
-			let x = touch.pageX, y = touch.pageY;
+			const touch = e.touches[0];
+			const x = touch.pageX, y = touch.pageY;
 			if (++counter === 1) {
 				tapCoord = [x, y];
 			} else {
@@ -108,7 +108,7 @@
 	}
 	function touchEnd(e) {
 		if (!e.touches.length) {
-			let aElem = document.activeElement;
+			const aElem = document.activeElement;
 			if (counter === 1
 				&& !(aElem instanceof HTMLTextAreaElement)
 				&& !(aElem instanceof HTMLInputElement && ['email', 'number', 'password', 'search', 'tel', 'text', 'url'].includes(aElem.type))
@@ -137,7 +137,7 @@
 		// set viewport
 		meta.content = viewport.fixed;
 
-		let closest = touch.target.closest('a[href],area[href]');
+		const closest = touch.target.closest('a[href],area[href]');
 		top.postMessage({
 			button: 2,
 			href: closest ? closest.href : null,
@@ -155,7 +155,7 @@
 		}
 	}
 	function dispatchMouseMove2(e) {
-		let touch = e.changedTouches[0];
+		const touch = e.changedTouches[0];
 		eventTarget.dispatchEvent(new MouseEvent('mousemove', {
 			bubbles: true,
 			clientX: touch.clientX,
@@ -169,7 +169,7 @@
 		// reset viewport
 		meta.content = viewport.initial;
 
-		let touch = e.changedTouches[0];
+		const touch = e.changedTouches[0];
 		eventTarget.dispatchEvent(new MouseEvent('mouseup', {
 			bubbles: true,
 			button: 2,
@@ -185,14 +185,14 @@
 			touches = Array.from(e.changedTouches);
 		}
 		if (touches) {
-			let startCoords = touches.map(t => tap2Coord.get(t.identifier));
-			let diffYs = touches.map((t, i) => startCoords[i][1] - t.screenY);
-			let absDiffYs = diffYs.map(Math.abs);
-			let maxAbs = Math.max.apply(null, absDiffYs);
-			let minAbs = Math.min.apply(null, absDiffYs);
-			let diff2 = diffYs[0] - diffYs[1];
+			const startCoords = touches.map(t => tap2Coord.get(t.identifier));
+			const diffYs = touches.map((t, i) => startCoords[i][1] - t.screenY);
+			const absDiffYs = diffYs.map(Math.abs);
+			const maxAbs = Math.max.apply(null, absDiffYs);
+			const minAbs = Math.min.apply(null, absDiffYs);
+			const diff2 = diffYs[0] - diffYs[1];
 			if (minAbs >= wheelMoving && maxAbs - minAbs < margin) {
-				let direction = Math.sign(diff2);
+				const direction = Math.sign(diff2);
 				top.dispatchEvent(new WheelEvent('wheel', {
 					deltaX: 0,
 					deltaY: minDelta * direction,

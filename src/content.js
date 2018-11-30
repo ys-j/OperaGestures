@@ -54,7 +54,7 @@
 	});
 
 	// overlay
-	let overlay = document.createElement('div');
+	const overlay = document.createElement('div');
 	overlay.id = EXT_URL.replace(/[/:-]+/g, '-') + 'overlay';
 	overlay.hidden = true;
 	overlay.style.display = 'none';
@@ -117,7 +117,7 @@
 	}
 
 	// main
-	let port = browser.runtime.connect();
+	const port = browser.runtime.connect();
 	let href;
 	let wheelTimer;
 	function initStartCoord() {
@@ -188,7 +188,7 @@
 		}
 	}, false);
 	
-	let func = new Map([
+	const func = new Map([
 		['left', () => { history.back(); }],
 		['right', () => { history.forward(); }],
 		['up', () => { window.stop(); }],

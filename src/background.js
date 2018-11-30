@@ -4,12 +4,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
  (function () {
 	'use strict';
-	Array.prototype.last = function (i) {
-		return this[this.length - (i || 0) - 1];
-	};
-
 	let locus = false, touch = false;
-	let ports = [];
+	const ports = [];
 	let enabled;
 	let blacklist = [];
 	
@@ -19,21 +15,18 @@
 		touch = v && v.config.touch || false;
 
 		let basic = 2047, extra = 0;
-		let gesture = v && v.gesture;
+		const gesture = v && v.gesture;
 		if (gesture) {
 			basic = gesture.basic;
 			extra = gesture.extra;
 		} else {
-			// for first use
-			browser.notifications.onClicked.addListener(() => {
-				browser.runtime.openOptionsPage();
-			});
-			browser.notifications.create({
-				type: 'basic',
-				title: 'Opera Gestures',
-				message: browser.i18n.getMessage('notification-oninstalled'),
-				iconUrl: browser.runtime.getURL('icon.svg'),
-			});
+			// for first use: open options page, discard other tabs 
+			browser.runtime.openOptionsPage();
+			if ('discard' in browser.tabs) {
+				browser.tabs.query({ discarded: false }).then(tabs => {
+					browser.tabs.discard(tabs.map(tab => tab.id));
+				});
+			}
 			// for Android
 			if (!('windows' in browser)) {
 				basic = 511;
@@ -61,14 +54,17 @@
 		blacklist = (v && v.blacklist || [
 			'^(?:about|chrome|file|jar|moz-extension|resource|view-source)',
 			'\\\.(?:pdf|svg)$',
-			'^https?://addons\\\.mozilla\\\.org/',
-			'^https?://testpilot\\\.firefox\\\.com/',
+			'^https?://(?:accounts-static|addons|content)\\\.cdn\\\.mozilla\\\.net/',
+			'^https?://(?:addons|discovery\\\.addons|input|install|support)\\\.mozilla\\\.org/',
+			'^https?://(?:accounts|testpilot)\\\.firefox\\\.com/',
+			'^https?://(?:api|oauth|profile)\\\.accounts\\\.firefox\\\.com/',
+			'^https?://sync\\\.services\\\.mozilla\\\.com/',
 		]).map(s => new RegExp(s));
 	});
 
 	browser.runtime.onConnect.addListener(p => {
 		if (!blacklist.some(re => re.test(p.sender.url))) {
-			let id = p.sender.tab.id;
+			const id = p.sender.tab.id;
 			ports[id] = p;
 			p.onMessage.addListener(onmessage.bind(p));
 			if (locus) {
@@ -89,18 +85,18 @@
 
 	// main
 	let gestures = [];
-	let isUrl = url => typeof url === 'string' && url.startsWith('http');
-	let func = new Map([
+	const isUrl = url => typeof url === 'string' && url.startsWith('http');
+	const func = new Map([
 		['down', async function (url) {
-			let opt = isUrl(url) ? { url: url } : {};
+			const opt = isUrl(url) ? { url: url } : {};
 			browser.tabs.create(opt);
 		}],
 		['down,up', async function (url) {
-			let _ = isUrl(url);
+			const _ = isUrl(url);
 			if (!_ && 'duplicate' in browser.tabs) {
 				browser.tabs.duplicate(this.sender.tab.id);
 			} else {
-				let opt = { active: false, url: _ ? url : this.sender.url };
+				const opt = { active: false, url: _ ? url : this.sender.url };
 				browser.tabs.create(opt);
 			}
 		}],
@@ -108,17 +104,17 @@
 			browser.tabs.remove(this.sender.tab.id);
 		}],
 		['down,left', async function () {
-			let currentWindow = await browser.windows.getCurrent();
-			let opt = { state: 'minimized' };
+			const currentWindow = await browser.windows.getCurrent();
+			const opt = { state: 'minimized' };
 			browser.windows.update(currentWindow.id, opt);
 		}],
 		['up,right', async function () {
-			let currentWindow = await browser.windows.getCurrent();
-			let opt = { state: currentWindow.state === 'normal' ? 'maximized' : 'normal' };
+			const currentWindow = await browser.windows.getCurrent();
+			const opt = { state: currentWindow.state === 'normal' ? 'maximized' : 'normal' };
 			browser.windows.update(currentWindow.id, opt);
 		}],
 		['right,up', async function () {
-			let sessions = await browser.sessions.getRecentlyClosed({ maxResults: 1 });
+			const sessions = await browser.sessions.getRecentlyClosed({ maxResults: 1 });
 			if (sessions.length) {
 				browser.sessions.restore((sessions[0].tab || sessions[0].window).sessionId);
 			}
@@ -126,9 +122,9 @@
 	]);
 
 	async function onmessage(m) {
-		let port = this;
+		const port = this;
 		if (enabled.get('wheel') && 'direction' in m) {
-			let tabs = await browser.tabs.query({ currentWindow: true });
+			const tabs = await browser.tabs.query({ currentWindow: true });
 			let idx = port.sender.tab.index + m.direction;
 			let target = tabs[idx];
 			function judgeSkip(isPort) {
@@ -163,13 +159,14 @@
 			selectTab();
 		} else {
 			if (m.states) {
-				let state = m.states[(gestures.length && m.states[0] === gestures.last() && m.states[1] !== gestures.last())|0];
-				if (state && state !== gestures.last() && state !== gestures.last(1)) {
+				const l = gestures.length;
+				const state = m.states[(l && m.states[0] === gestures[l-1] && m.states[1] !== gestures[l-1])|0];
+				if (state && state !== gestures[l-1] && state !== gestures[l-2]) {
 					gestures.push(state);
 				}
 			}
 			if (m.execute) {
-				let gesture = gestures.join();
+				const gesture = gestures.join();
 				if (enabled.get(gesture)) {
 					if (func.has(gesture)) {
 						func.get(gesture).bind(port)(m.url).catch(e => {

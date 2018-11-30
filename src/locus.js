@@ -9,17 +9,17 @@
 
 	const RATIO = window.devicePixelRatio || 1;
 
-	let overlay = document.getElementById(ID_PREFIX + 'overlay');
-	let canvas = document.createElement('canvas');
+	const overlay = document.getElementById(ID_PREFIX + 'overlay');
+	const canvas = document.createElement('canvas');
 	canvas.id = ID_PREFIX + 'canvas';
 	canvas.style.height = '100%';
 	canvas.style.width = '100%';
 
 	overlay.appendChild(canvas);
 
-	let ctx = canvas.getContext('2d');
+	const ctx = canvas.getContext('2d');
 	
-	let styleMap = new Map([
+	const styleMap = new Map([
 		['globalAlpha', .25],
 		['lineCap', 'round'],
 		['lineJoin', 'round'],
@@ -27,9 +27,9 @@
 		['strokeStyle', '#30e60b'],
 	]);
 	browser.storage.local.get(['locus']).then(v => {
-		let userStyle = v && v.locus.style || {};
+		const userStyle = v && v.locus.style || {};
 		if (v && v.locus.themecolor) {
-			let meta = document.head.querySelector('meta[name="theme-color"]');
+			const meta = document.head.querySelector('meta[name="theme-color"]');
 			if (meta) {
 				userStyle.strokeStyle = meta.content;
 			}
