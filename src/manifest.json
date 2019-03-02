@@ -1,11 +1,11 @@
 {
 	"manifest_version": 2,
 	"name": "Opera Gestures",
-	"version": "0.7b5",
+	"version": "0.7b6",
 	"applications": {
 		"gecko": {
 			"id": "{57466e58-d98e-457c-8b93-0b9bb6f3e0b0}",
-			"strict_min_version": "55.0"
+			"strict_min_version": "52.0"
 		}
 	},
 	"description": "__MSG_manifest_description__",
@@ -16,8 +16,8 @@
 	"author": "_y_s",
 	"homepage_url": "https://github.com/ys0115/OperaGestures",
 	"default_locale": "en",
-	"permissions": ["activeTab", "sessions", "storage"],
-	"optional_permissions": ["<all_urls>", "browserSettings"],
+	"permissions": ["<all_urls>", "sessions", "storage"],
+	"optional_permissions": ["browserSettings"],
 	"icons": {
 		"48": "icon.svg",
 		"96": "icon.svg"

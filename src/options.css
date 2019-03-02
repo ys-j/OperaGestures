@@ -508,6 +508,7 @@ nav {
 	box-shadow: var(--shadow-30);
 	float: left;
 	height: 100%;
+	overflow-y: auto;
 	position: relative;
 	width: 16rem;
 	z-index: 3;
@@ -528,7 +529,6 @@ nav {
 @media screen and (max-width: 60em) {
 	nav {
 		margin-left: -18rem;
-		overflow-y: scroll;
 		position: fixed;
 		transition: margin-left .3s var(--ease);
 	}

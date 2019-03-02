@@ -317,36 +317,28 @@
 	};
 
 	// save beta features
-	g.onsubmit = async e => {
-		e.preventDefault();
-		saveConfig();
-		if (g.locus.checked || g.touch.checked) {
-			try {
-				if (await browser.permissions.request({ origins: ['<all_urls>'] })) {
-					await browser.storage.local.set({
-						locus: {
-							style: {
-								lineWidth: g.lt.value | 0,
-								strokeStyle: g.lc.value,
-							},
-							opacity: g.lo.value * 0.01,
-							themecolor: g.lptc.checked,
-						},
-						touch: {
-							duration: g.td.value * 1000,
-							margin: g.tm.value | 0,
-						},
-					});
-				} else {
-					throw 'Permission denied: <all_urls>';
-				}
-			} catch (err) {
-				console.warn(err);
-				return false;
-			}
-		}
-		popSaved.hidden = false;
-		popSaved.focus();
+	g.onsubmit = () => {
+		Promise.all([
+			saveConfig(),
+			browser.storage.local.set({
+				locus: {
+					style: {
+						lineWidth: g.lt.value | 0,
+						strokeStyle: g.lc.value,
+					},
+					opacity: g.lo.value * 0.01,
+					themecolor: g.lptc.checked,
+				},
+				touch: {
+					duration: g.td.value * 1000,
+					margin: g.tm.value | 0,
+				},
+			}),
+		]).then(() => {
+			popSaved.hidden = false;
+			popSaved.focus();
+		});
+		return false;
 	};
 
 	// modify browser setting

@@ -14,7 +14,7 @@
 	
 	self.addEventListener('mousedown', e => {
 		if (e.button === 2) {
-			let closest = e.target.closest('a[href],area[href]');
+			const closest = e.target.closest('a[href],area[href]');
 			top.postMessage({
 				href: closest ? closest.href : null,
 				origin: EXT_URL,
@@ -39,9 +39,8 @@
 	// load config
 	browser.storage.local.get(['config']).then(v => {
 		const INITIAL = { config: { mm1: 32, mm2: 16, ar: 30, wm: 4 } };
-		let config = v.config;
-		if (config) {
-			vars = config;
+		if (v.config) {
+			vars = v.config;
 		} else {
 			vars = INITIAL.config;
 			browser.storage.local.set({
@@ -66,13 +65,14 @@
 	overlay.style.zIndex = 0x7fffffff;
 	document.addEventListener('DOMContentLoaded', () => {
 		if (document.body.nodeName.toLowerCase() === 'frameset') {
-			let body = document.createElement('body');
+			const body = document.createElement('body');
 			document.body = frameset2div(document.body, body);
+			document.documentElement.style.height = '100%';
 		}
 		document.body.appendChild(overlay);
 	});
 	function frameset2div(frameset, wrapper) {
-		let styleGrid = attr => attr ? attr.split(',').map(v => v.replace(/(\d*)(\D*)/, (_, p1, p2) => (p1 || '1') + (p2 ? p2 === '*' ? 'fr' : p2 : 'px'))).join(' ') : '';
+		const styleGrid = attr => attr ? attr.split(',').map(v => v.replace(/(\d*)(\D*)/, (_, p1, p2) => (p1 || '1') + (p2 ? p2 === '*' ? 'fr' : p2 : 'px'))).join(' ') : '';
 		if (!wrapper) {
 			wrapper = document.createElement('div');
 		}
@@ -84,10 +84,10 @@
 		['cols', 'rows'].forEach((v, i) => {
 			wrapper.style[STYLE_NAMES[i]] = styleGrid(frameset.getAttribute(v));
 		});
-		let frameborder = frameset.getAttribute('frameborder')  || '';
+		const frameborder = frameset.getAttribute('frameborder')  || '';
 		if (frameborder) {
 			wrapper.dataset.frameBorder = frameborder;
-			let style = document.createElement('style');
+			const style = document.createElement('style');
 			style.textContent = '[data-frame-border] iframe{border:' + (isNaN(frameborder) ? 'inherit}' : frameborder + 'px}');
 			wrapper.appendChild(style);
 		}
@@ -98,7 +98,7 @@
 		};
 		Array.from(frameset.children).forEach(child => {
 			let newnode;
-			let nodeName = child.nodeName.toLowerCase();
+			const nodeName = child.nodeName.toLowerCase();
 			if (nodeName in NEW_ELEMENT_TEMPLATE) {
 				let newelem = NEW_ELEMENT_TEMPLATE[nodeName].cloneNode();
 				Array.from(child.attributes).forEach(attr => {
@@ -125,9 +125,9 @@
 	}
 	
 	function checkstate(e) {
-		let diffX = e.screenX - startX, diffY = e.screenY - startY;
-		let absX = Math.abs(diffX), absY = Math.abs(diffY);
-		let min = first ? vars.mm1 : vars.mm2;
+		const diffX = e.screenX - startX, diffY = e.screenY - startY;
+		const absX = Math.abs(diffX), absY = Math.abs(diffY);
+		const min = first ? vars.mm1 : vars.mm2;
 
 		if (min < absX || min < absY) {			
 			let states;
@@ -158,7 +158,7 @@
 			startX = e.screenX, startY = e.screenY;
 		}
 		startX += e.deltaX, startY += e.deltaY;
-		let diffY = startY - e.screenY;
+		const diffY = startY - e.screenY;
 		if (vars.wm < Math.abs(diffY)) {
 			startX = e.screenX, startY = e.screenY;
 			port.postMessage({ type: 'wheel', direction: Math.sign(diffY) });
@@ -172,6 +172,7 @@
 			port.postMessage({ execute: true, url: href });
 			self.removeEventListener('mousemove', checkstate);
 			self.removeEventListener('wheel', onwheel);
+			self.removeEventListener('mouseup', onmouseup);
 		}
 	}
 
@@ -182,9 +183,9 @@
 			first = true;
 			startX = e.data.screenX, startY = e.data.screenY;
 			href = e.data.href;
-			self.addEventListener('mousemove', checkstate, { once: false, passive: true });
-			self.addEventListener('wheel', onwheel, { once: false, passive: false });
-			self.addEventListener('mouseup', onmouseup, { once: true, passive: true });
+			self.addEventListener('mousemove', checkstate, { passive: true });
+			self.addEventListener('wheel', onwheel, { passive: false });
+			self.addEventListener('mouseup', onmouseup, { passive: true });
 		}
 	}, false);
 	
@@ -198,8 +199,8 @@
 			overlay.hidden = false;
 			overlay.style.display = 'block';
 			startX = -1, startY = -1;
-			self.addEventListener('wheel', onwheel, { once: false, passive: false });
-			self.addEventListener('mouseup', onmouseup, { once: true, passive: true });
+			self.addEventListener('wheel', onwheel, { passive: false });
+			self.addEventListener('mouseup', onmouseup, { passive: true });
 			self.addEventListener('contextmenu', preventDefault, { once: true });
 		}],
 		['leave', () => {
