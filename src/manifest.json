@@ -5,7 +5,7 @@
 	"applications": {
 		"gecko": {
 			"id": "{57466e58-d98e-457c-8b93-0b9bb6f3e0b0}",
-			"strict_min_version": "52.0"
+			"strict_min_version": "77.0"
 		}
 	},
 	"description": "__MSG_manifest_description__",
