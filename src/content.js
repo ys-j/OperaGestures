@@ -87,7 +87,7 @@ function frameset2div(frameset, wrapper = document.createElement('div')) {
 	].forEach(([attrName, styleName]) => {
 		const val = frameset.getAttribute(attrName);
 		if (val) {
-			wrapper.style[styleName] = val.split(',').map(v => v.replace(/(\d*)(\D*)/, /** @param p {string[]} */ (...p) => (p[1] || '1') + (p[2] ? p[2] === '*' ? 'fr' : p[2] : 'px'))).join(' ');
+			wrapper.style[styleName] = val.split(',').map(v => v.replace(/\s*(\d*)(\D*)\s*/, /** @param p {string[]} */ (...p) => (p[1] || '1') + (p[2] ? p[2] === '*' ? 'fr' : p[2] : 'px'))).join(' ');
 		}
 	});
 	const frameBorder = frameset.getAttribute('frameborder')  || '0';
