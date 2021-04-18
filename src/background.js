@@ -2,19 +2,15 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-//@ts-check
-let locus = false, touch = false;
 /** @type {browser.runtime.Port[]} */
 const ports = [];
-/** @type {Map<string,number>} */
+/** @type {Map<string, number>} */
 let enabled;
+/** @type {RegExp[]} */
 let blacklist = [];
 
 // load storage
 browser.storage.local.get(['config', 'gesture', 'blacklist']).then(v => {
-	locus = v && v.config.locus || false;
-	touch = v && v.config.touch || false;
-
 	let basic = 2047, extra = 0;
 	const gesture = v && v.gesture;
 	if (gesture) {
@@ -52,7 +48,7 @@ browser.storage.local.get(['config', 'gesture', 'blacklist']).then(v => {
 		['right,up', extra & 1],
 		['wheel-skip', extra & 2],
 	]);
-	blacklist = (v && v.blacklist || [
+	blacklist = (v && /** @type {string[]} */ (v.blacklist) || [
 		'^(?:about|chrome|file|jar|moz-extension|resource|view-source)',
 		'\\\.(?:pdf|svg)$',
 		'^https?://(?:accounts-static|addons|content)\\\.cdn\\\.mozilla\\\.net/',
@@ -68,27 +64,14 @@ browser.runtime.onConnect.addListener(p => {
 		const id = p.sender.tab.id;
 		ports[id] = p;
 		p.onMessage.addListener(onMessage.bind(p));
-		if (locus) {
-			browser.tabs.executeScript(id, {
-				file: 'locus.js',
-				runAt: 'document_end',
-			});
-		}
-		if (touch) {
-			browser.tabs.executeScript(id, {
-				allFrames: true,
-				file: 'touch.js',
-				runAt: 'document_end',
-			});
-		}
 	}
 });
 
 // main
 /** @type {string[]} */
 let gestures = [];
-const isUrl = url => typeof url === 'string' && url.startsWith('http');
-/** @type {Map<string, (url?: string) => Promise<void>>} */
+const isUrl = (/** @type {*} */ url) => typeof url === 'string' && url.startsWith('http');
+/** @type {Map<string, (this: browser.runtime.Port, url: string) => Promise<void>>} */
 const func = new Map([
 	['left', async function () {
 		browser.tabs.goBack();
@@ -120,7 +103,7 @@ const func = new Map([
 		}
 	}],
 	['down,right', async function () {
-		browser.tabs.remove(this.sender.tab.id);
+		browser.tabs.remove([this.sender.tab.id]);
 	}],
 	['down,left', async function () {
 		const currentWindow = await browser.windows.getCurrent();
@@ -133,7 +116,7 @@ const func = new Map([
 	['right,up', async function () {
 		const sessions = await browser.sessions.getRecentlyClosed({ maxResults: 1 });
 		if (sessions.length) {
-			browser.sessions.restore((sessions[0].tab || sessions[0].window).sessionId);
+			browser.sessions.restore((sessions[0].tab || sessions[0].window).sessionId ?? '');
 		}
 	}],
 ]);
@@ -144,30 +127,26 @@ const func = new Map([
  */
 async function onMessage(m) {
 	const port = this;
-	if (enabled.get('wheel') && 'direction' in m) {
+	if (enabled.get('wheel') && m.direction) {
+		const dir = m.direction;
 		const tabs = await browser.tabs.query({ currentWindow: true });
-		let idx = port.sender.tab.index + m.direction;
+		let idx = port.sender.tab.index + dir;
 		let target = tabs[idx];
-		/**
-		 * @param {?browser.runtime.Port} isPort 
-		 */
-		function judgeSkip(isPort) {
+		
+		const judgeSkip = (/** @type {?browser.runtime.Port} */ isPort) => {
 			if (enabled.get('wheel-skip') && !isPort) {
-				idx += m.direction;
+				idx += dir;
 				selectTab();
 			} else {
 				port.postMessage({ func: 'leave' });
 				ports[target.id].postMessage({ func: 'enter' });
 			}
 		}
-		/**
-		 * @param {browser.runtime.Port} port 
-		 */
-		function observeConnection(port) {
+		const observeConnection = (/** @type {browser.runtime.Port} */ port) => {
 			browser.runtime.onConnect.removeListener(observeConnection);
 			judgeSkip(port);
 		}
-		function selectTab() {
+		const selectTab = () => {
 			if (idx < 0) {
 				idx = tabs.length - 1;
 			} else if (idx >= tabs.length) {
@@ -197,7 +176,8 @@ async function onMessage(m) {
 			gestures = [];
 			if (enabled.get(gesture)) {
 				if (func.has(gesture)) {
-					func.get(gesture).bind(port)(m.url).catch(e => {
+					const _func = /** @type { (url: ?string) => Promise<void>} */ (func.get(gesture));
+					_func.bind(port)(m.url).catch((/** @type {Error} */ e) => {
 						port.postMessage({ error: e });
 					});
 				} else {

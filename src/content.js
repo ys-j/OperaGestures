@@ -2,7 +2,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @ts-check
 const EXT_URL = browser.runtime.getURL('/');
 let first = true;
 let startX = -1, startY = -1;
@@ -38,7 +37,7 @@ if (self !== top) {
 }
 
 // glocal vars
-/** @type { { [key:string]:number } } */
+/** @type { { [key:string]: number } } */
 let vars = {};
 
 // load config
@@ -61,15 +60,60 @@ browser.storage.local.get(['config']).then(/** @param v { { config:{} } } */ v =
 const overlay = document.createElement('div');
 overlay.id = EXT_URL.replace(/[/:-]+/g, '-') + 'overlay';
 overlay.hidden = true;
-overlay.style.cssText = 'display:none;position:fixed;height:100%;width:100%;left:0;right:0;z-index:2147483647';
-document.addEventListener('DOMContentLoaded', () => {
+overlay.style.cssText = 'display:none;position:fixed;height:100%;width:100%;left:0;top:0;z-index:2147483647';
+
+document.addEventListener('DOMContentLoaded', onDOMContentLoaded);
+function onDOMContentLoaded() {
 	if (document.body.nodeName.toLowerCase() === 'frameset') {
 		const body = document.createElement('body');
 		document.body = frameset2div(document.body, body);
 		document.documentElement.style.height = '100%';
 	}
 	document.body.appendChild(overlay);
-});
+
+	// load locus.js / touch.js
+	/**
+	 * Create GET-method-style parameters from object.
+	 * @param { { [key:string]: * } } obj target object
+	 * @param {number} n current nested number
+	 * @param {string[]} keyContainer key container
+	 */
+	const createParams = (obj, n = 0, keyContainer = []) => {
+		/** @type {(string|string[])[]} */
+		let params = [];
+		let val;
+		for ([keyContainer[n], val] of Object.entries(obj)) {
+			if (typeof val === 'object') {
+				params.push(createParams(val, n + 1, keyContainer));
+			} else {
+				params.push(keyContainer.slice(0, n + 1).join('.') + '=' + val.toString());
+			}
+		}
+		return params.flat().join('&');
+	}
+	if (vars.locus) {
+		const script = document.createElement('script');
+		script.defer = true;
+		script.src = EXT_URL + 'locus.js';
+		browser.storage.local.get(['locus']).then(v => {
+			if (v && v.locus) {
+				script.src += '?' + createParams(v.locus);
+			}
+			overlay.appendChild(script);
+		});
+	}
+	if (vars.touch) {
+		const script = document.createElement('script');
+		script.defer = true;
+		script.src = EXT_URL + `touch.js?mm1=${vars.mm1 || 32}&wm=${vars.wm || 4}`;
+		browser.storage.local.get(['touch']).then(v => {
+			if (v && v.touch) {
+				script.src += '?' + createParams(v.touch);
+			}
+			overlay.appendChild(script);
+		});
+	}
+}
 
 /**
  * Convert <frameset> element to <div> element
@@ -81,32 +125,27 @@ function frameset2div(frameset, wrapper = document.createElement('div')) {
 	wrapper.style.height = '100%';
 	wrapper.style.width = '100%';
 	wrapper.style.margin = '0';
-	[
-		['cols', 'gridTemplateColumns'],
-		['rows', 'gridTemplateRows']
-	].forEach(([attrName, styleName]) => {
-		const val = frameset.getAttribute(attrName);
-		if (val) {
-			wrapper.style[styleName] = val.split(',').map(v => v.replace(/\s*(\d*)(\D*)\s*/, /** @param p {string[]} */ (...p) => (p[1] || '1') + (p[2] ? p[2] === '*' ? 'fr' : p[2] : 'px'))).join(' ');
-		}
-	});
+	const framesetAttr2GridStyle = (/** @type {string} */ attr) => attr.split(',').map(v => v.replace(/\s*(\d*)(\D*)\s*/, (/** @type {string[]} */ ...p) => (p[1] || '1') + (p[2] ? p[2] === '*' ? 'fr' : p[2] : 'px'))).join(' ');
+	const [_cols, _rows] = ['cols', 'rows'].map(a => frameset.getAttribute(a));
+	if (_cols) wrapper.style.gridTemplateColumns = framesetAttr2GridStyle(_cols);
+	if (_rows) wrapper.style.gridTemplateRows = framesetAttr2GridStyle(_rows);
 	const frameBorder = frameset.getAttribute('frameborder')  || '0';
 	wrapper.dataset.frameBorder = frameBorder;
 	const style = document.createElement('style');
 	style.textContent = `[data-frame-border] iframe{border:${isNaN(+frameBorder) ? 'inherit' : `${frameBorder}px`};height:inherit;width:inherit}`;
 	wrapper.appendChild(style);
 	
+	/** @type { { [key:string]: HTMLElement } } */
 	const NEW_ELEMENT_TEMPLATE = {
 		frame: document.createElement('iframe'),
 		frameset: document.createElement('div'),
 	};
-	Array.from(frameset.children).forEach(/** @param {HTMLElement} child */ child => {
+	Array.from(frameset.children).forEach((/** @type {HTMLElement} */ child) => {
 		/** @type {Node} */
 		let newnode;
 		const nodeName = child.nodeName.toLowerCase();
 		if (nodeName in NEW_ELEMENT_TEMPLATE) {
-			/** @type {HTMLElement} */
-			const newelem = NEW_ELEMENT_TEMPLATE[nodeName].cloneNode();
+			const newelem = /** @type {HTMLElement} */ (NEW_ELEMENT_TEMPLATE[nodeName].cloneNode());
 			Array.from(child.attributes).forEach(attr => {
 				newelem.setAttribute(attr.name, attr.value);
 			});
@@ -138,8 +177,8 @@ function checkState(e) {
 	const min = first ? vars.mm1 : vars.mm2;
 
 	if (min < absX || min < absY) {			
-		/** @type {?string[]} */
-		let states;
+		/** @type {?(?string)[]} */
+		let states = null;
 		if (absX > absY) {
 			if (vars.tan > absY / absX) {
 				states = [diffX < 0 ? 'left' : 'right'];
@@ -224,6 +263,7 @@ const funcMap = new Map([
 ]);
 port.onMessage.addListener(/** @param m { { func?:string, error?:string } } */ m => {
 	if (m.func && funcMap.has(m.func)) {
+		// @ts-ignore
 		funcMap.get(m.func)();
 	} else if (m.error) {
 		throw m.error;

@@ -7,33 +7,33 @@
 	const EXT_MANIFEST = browser.runtime.getManifest();
 	const EXT_URL = browser.runtime.getURL('/');
 
+	/** @type { { [key:string]: number } } */
 	const vars = {};
-	const s = document.forms.s;	// sensibility
-	const fb = document.forms.fb;	// functions (basic)
-	const fe = document.forms.fe;	// functions (extra)
-	const b = document.forms.b;	// blacklist (list)
-	const c = document.forms.c;	// blacklist (confirm)
-	const g = document.forms.g;	// beta features
-	const ml = document.forms.ml;	// for Mac/Linux
-	const fbc = Array.from(fb);
-	const gesture = document.getElementById('gesture');
-	const matchedPattern = document.getElementById('matchedPattern');
+	// @ts-ignore
+	const { s, fb, fe, b, c, g, ml } = /** @type { { [key:string]: HTMLFormElement } } */ (document.forms); // sensibility, functions (basic), functions (extra), blacklist (list), blacklist (confirm), beta features, for Mac/Linux
+	const fbc = /** @type {HTMLInputElement[]} */ (Array.from(fb));
+	const gesture = /** @type {HTMLOutputElement} */ (document.getElementById('gesture'));
+	const matchedPattern = /** @type {HTMLOutputElement} */ (document.getElementById('matchedPattern'));
 	const svg = document.getElementsByTagName('svg');
 
 	const _cc = svg[0].getElementById('_cc');
 	const _tl = svg[0].getElementById('_tl');
 	const _ml = svg[1].getElementById('_ml');
 
-	const dialog = document.getElementById('dialog');
+	const dialog = /** @type {HTMLDivElement} */ (document.getElementById('dialog'));
 	const dialogMessages = Array.from(dialog.getElementsByClassName('message'));
+	
+	/** @this {HTMLElement} */
 	function openDialog() {
 		document.body.classList.add('dialog-opened')
 		this.hidden = false;
-		this.onfocus = e => {
-			e.target.classList.add('nofocus');
+		this.onfocus = (/** @type {FocusEvent} */ e) => {
+			/** @type {HTMLElement} */ (e.target).classList.add('nofocus');
 		};
 		this.focus();
 	}
+	
+	/** @this {HTMLElement} */
 	function closeDialog() {
 		this.addEventListener('transitionend', () => {
 			document.body.classList.remove('dialog-opened')
@@ -54,7 +54,7 @@
 	(function subst_i18n() {
 		const lang = browser.i18n.getUILanguage();
 		document.documentElement.setAttribute('lang', lang === 'ja' ? 'ja' : 'en');
-		document.querySelectorAll('[data-i18n]').forEach(elem => {
+		document.querySelectorAll('[data-i18n]').forEach((/** @type {HTMLElement} */ elem) => {
 			const args = [];
 			for (let i = 1; i < 9; i++) {
 				const data = elem.dataset['i18n-$' + i];
@@ -64,12 +64,13 @@
 					break;
 				}
 			}
-			const msg = browser.i18n.getMessage(elem.dataset.i18n, args);
+			const msg = browser.i18n.getMessage(/** @type {string} */ (elem.dataset.i18n), args);
 			if (msg && msg !== '??') {
 				elem.textContent = msg;
 			}
 		});
 		document.querySelectorAll('[data-subst]').forEach(elem => {
+			// @ts-ignore
 			const msg = EXT_MANIFEST[elem.dataset.subst];
 			if (msg && typeof msg === 'string') {
 				elem.textContent = msg;
@@ -81,8 +82,8 @@
 	function toggleNav() {
 		document.body.classList.toggle('nav-opened');
 	}
-	const btnMenu = document.getElementById('menu');
-	const overlayMenu = document.getElementById('overlay');
+	const btnMenu = /** @type {HTMLAnchorElement} */ (document.getElementById('menu'));
+	const overlayMenu = /** @type {HTMLDivElement} */ (document.getElementById('overlay'));
 	btnMenu.onclick = toggleNav;
 	overlayMenu.onclick = toggleNav;
 
@@ -98,7 +99,7 @@
 	Array.from(document.getElementsByClassName('message')).forEach(pop => {
 		pop.addEventListener('transitionend', e => {
 			if (e.target !== document.activeElement) {
-				e.target.hidden = true;
+				/** @type {HTMLElement} */ (e.target).hidden = true;
 			}
 		}, { passive: true });
 		// for Firefox 52
@@ -106,21 +107,22 @@
 			btn.onmousedown = e => e.preventDefault();
 		})
 	});
-	document.querySelectorAll('button[data-message-for]').forEach(btn => {
-		const target = document.getElementById(btn.dataset.messageFor);
+	document.querySelectorAll('button[data-message-for]').forEach((/** @type {HTMLButtonElement} */ btn) => {
+		const target = document.getElementById(/** @type {string} */ (btn.dataset.messageFor));
 		btn.onclick = () => {
-			target.focus();
+			/** @type {HTMLElement} */ (target).focus();
 			return false;
 		};
 	});
 
 	// update svg
 	function updateSVG() {
-		vars.mm1 = s.mm1.value;
-		vars.mm2 = s.mm2.value;
-		vars.rad = s.ar.value / 360 * Math.PI;
+		const { mm1, mm2, ar, wm } = /** @type { { [key:string]: HTMLInputElement } } */ (s);
+		vars.mm1 = mm1.valueAsNumber;
+		vars.mm2 = mm2.valueAsNumber;
+		vars.rad = ar.valueAsNumber / 360 * Math.PI;
 		vars.tan = Math.tan(vars.rad);
-		vars.wm = s.wm.value;
+		vars.wm = wm.valueAsNumber;
 		const ccv = (vars.mm1 / 20).toFixed(1);
 		_cc.setAttribute('r', ccv);
 		const cx = (8 * Math.cos(vars.rad)).toFixed(1);
@@ -131,16 +133,21 @@
 	}
 
 	// update nested checkboxes
-	function updateNestedCheckboxes(e) {
+	function updateNestedCheckboxes(/** @type {?Event} */ e) {
+		/** @type {HTMLInputElement[]} */
 		let nests;
 		if (e) {
 			// label:has(e.target) + fieldset.nest-child
-			nests = [e.target.parentElement.nextElementSibling];
+			const _target = /** @type {HTMLElement} */ (e.target);
+			const _parent = /** @type {HTMLElement} */ (_target.parentElement);
+			nests = [/** @type {HTMLInputElement} */ (_parent.nextElementSibling)];
 		} else {
-			nests = Array.from(document.getElementsByClassName('nest-child'));
+			nests = /** @type {HTMLInputElement[]} */ (Array.from(document.getElementsByClassName('nest-child')));
 		}
 		nests.forEach(nest => {
-			nest.disabled = !nest.previousElementSibling.firstElementChild.checked;
+			const _sibling = /** @type {HTMLElement} */ (nest.previousElementSibling);
+			const _child = /** @type {HTMLInputElement} */ (_sibling.firstElementChild);
+			nest.disabled = !_child.checked;
 		});
 	}
 
@@ -154,18 +161,21 @@
 			blacklist: [],
 		};
 
-		const config = STORAGE.config || INITIAL.config;		
-		s.mm1.value = config.mm1;
-		s.mm2.value = config.mm2;
-		s.ar.value = config.ar;
-		s.wm.value = config.wm;
-		s.mm1.onchange = updateSVG;
-		s.mm2.onchange = updateSVG;
-		s.ar.onchange = updateSVG;
+		/** @type { { mm1: number, mm2: number, ar: number, wm: number, locus: boolean, touch: boolean } } */
+		const config = STORAGE.config || INITIAL.config;
+		const { mm1, mm2, ar, wm } = /** @type { { [key:string]: HTMLInputElement } } */ (s);
+		mm1.valueAsNumber = config.mm1;
+		mm2.valueAsNumber = config.mm2;
+		ar.valueAsNumber = config.ar;
+		wm.valueAsNumber = config.wm;
+		mm1.onchange = updateSVG;
+		mm2.onchange = updateSVG;
+		ar.onchange = updateSVG;
 		updateSVG();
 
 		const gesture = STORAGE.gesture || INITIAL.gesture;
 		fbc.forEach((elem, i) => {
+			// @ts-ignore
 			elem.checked = gesture.basic & Math.pow(2, i);
 		});
 		// for Android
@@ -173,58 +183,46 @@
 			fbc[9].checked = fbc[10].checked = false;
 			fbc[9].disabled = fbc[10].disabled = true;
 		}
+		const { ru, w1 } = /** @type { { [key:string]: HTMLInputElement } } */ (fe);
 		if (!('sessions' in browser)) {
-			fe.ru.checked = false;
-			fe.ru.disabled = true;
+			ru.checked = false;
+			ru.disabled = true;
 		} else {
-			fe.ru.checked = gesture.extra & 1;
+			// @ts-ignore
+			ru.checked = gesture.extra & 1;
 		}
-		fe.w1.checked = gesture.extra & 2;
-		fb.w.onchange = updateNestedCheckboxes;
+		// @ts-ignore
+		w1.checked = gesture.extra & 2;
+		/** @type {HTMLInputElement} */ (fb.w).onchange = updateNestedCheckboxes;
 
+		/** @type {string[]} */
 		const blacklist = STORAGE.blacklist || INITIAL.blacklist;
-		b.ul.value = blacklist.join('\n');
+		/** @type {HTMLTextAreaElement} */ (b.ul).value = blacklist.join('\n');
 		
-		const locus = STORAGE.locus || INITIAL.locus;
-		g.locus.checked = config.locus || false;
-		g.lt.value = locus.style.lineWidth;
-		g.lc.value = locus.style.strokeStyle;
-		g.lco.value = g.lc.value;
-		g.lptc.checked = locus.themecolor;
-		g.lo.value = locus.opacity * 100;
-		g.locus.onchange = updateNestedCheckboxes;
-		g.lc.onchange = () => {
-			g.lco.value = g.lc.value;
+		const { locus, lt, lc, lco, lptc, lo, touch, td, tm } = /** @type { { [key:string]: HTMLInputElement } } */ (g);
+		const _locus = STORAGE.locus || INITIAL.locus;
+		locus.checked = config.locus || false;
+		lt.valueAsNumber = _locus.style.lineWidth;
+		lc.value = _locus.style.strokeStyle;
+		lco.value = lc.value;
+		lptc.checked = _locus.themecolor;
+		lo.valueAsNumber = _locus.opacity * 100;
+		locus.onchange = updateNestedCheckboxes;
+		lc.onchange = () => {
+			lco.value = lc.value;
 		};
 
-		const touch = STORAGE.touch || INITIAL.touch;
-		g.touch.checked = config.touch || false;
-		g.td.value = touch.duration * 0.001;
-		g.tm.value = touch.margin;
-		g.touch.onchange = updateNestedCheckboxes;
+		const _touch = STORAGE.touch || INITIAL.touch;
+		touch.checked = config.touch || false;
+		td.valueAsNumber = _touch.duration * 0.001;
+		tm.valueAsNumber = _touch.margin;
+		touch.onchange = updateNestedCheckboxes;
 		
 		updateNestedCheckboxes();
-		return Promise.resolve(config);
-	}).then((cfg) => {
-		// for preview
-		if (cfg.locus) {
-			const script = document.createElement('script');
-			script.src = 'locus.js';
-			document.body.appendChild(script);
-		}
-		if (cfg.touch) {
-			const script = document.createElement('script');
-			script.src = 'touch.js';
-			document.body.appendChild(script);
-			window.addEventListener('message', e => {
-				if (e.data.origin === EXT_URL) {
-					onmousedown(e.data);
-				}
-			}, false);
-		}
 	});
 
 	// reload extenison
+	/** @type {() => void} */
 	let reloadExtension;
 	if ('discard' in browser.tabs) {
 		reloadExtension = async () => {
@@ -244,8 +242,8 @@
 	}
 
 	// save
-	const popSaved = document.getElementById('pop-saved');
-	popSaved.lastElementChild.onclick = reloadExtension;
+	const popSaved = /** @type {HTMLDivElement} */ (document.getElementById('pop-saved'));
+	/** @type {HTMLButtonElement} */ (popSaved.lastElementChild).onclick = reloadExtension;
 	const saveConfig = () => browser.storage.local.set({
 		version: EXT_MANIFEST.version,
 		config: {
@@ -289,7 +287,7 @@
 
 	// save blacklist
 	b.onsubmit = () => {
-		const v = b.ul.value.replace(/\\\//g, '/');
+		const v = /** @type {HTMLTextAreaElement} */ (b.ul).value.replace(/\\\//g, '/');
 		browser.storage.local.set({
 			version: EXT_MANIFEST.version,
 			blacklist: v ? v.split('\n').filter(s => s.length) : [],
@@ -311,8 +309,9 @@
 		} else {
 			matchedPattern.value = browser.i18n.getMessage('none');
 		}
-		matchedPattern.parentElement.hidden = false;
-		matchedPattern.parentElement.focus();
+		const _parent = /** @type {HTMLElement} */ (matchedPattern.parentElement);
+		_parent.hidden = false;
+		_parent.focus();
 		return false;
 	};
 
@@ -344,11 +343,12 @@
 	// modify browser setting
 	if (browser.browserSettings && 'contextMenuShowEvent' in browser.browserSettings) {
 		browser.browserSettings.contextMenuShowEvent.get({}).then(setting => {
-			ml.cm.checked = setting.value === 'mouseup';
+			/** @type {HTMLInputElement} */ (ml.cm).checked = setting.value === 'mouseup';
 		});
 	}
-	ml.cm.onchange = async e => {
-		if (e.target.checked) {
+	/** @type {HTMLInputElement} */ (ml.cm).onchange = async e => {
+		const _target = /** @type {HTMLInputElement} */ (e.target);
+		if (_target.checked) {
 			try {
 				if (await browser.permissions.request({ permissions: ['browserSettings'] })) {
 					browser.browserSettings.contextMenuShowEvent.set({ value: 'mouseup' }).catch(err => {
@@ -359,31 +359,32 @@
 				}
 			} catch (err) {
 				console.warn(err);
-				e.target.checked = false;
+				_target.checked = false;
 				const msgbox = dialogMessages[1];
 				msgbox.getElementsByTagName('button')[0].onclick = closeDialog.bind(msgbox);
 				openDialog.bind(msgbox)();
 			}
 		} else {
 			try {
-				e.target.checked = !(await browser.browserSettings.contextMenuShowEvent.clear({}));
+				_target.checked = !(await browser.browserSettings.contextMenuShowEvent.clear({}));
 			} catch (err) {
 				console.warn(err);
-				e.target.checked = true;
+				_target.checked = true;
 			}
 		}
 	};
 
 	// preview
 	let startX = 0, startY = 0;
+	/** @type {string[]} */
 	let gestures = [];
 	const overlay = document.createElement('div');
 	overlay.id = EXT_URL.replace(/[/:-]+/g, '-') + 'overlay';
 	overlay.hidden = true;
-	overlay.style.zIndex = 0x7fffffff;
+	overlay.style.zIndex = 0x7fffffff.toFixed();
 	document.body.appendChild(overlay);
 
-	function checkstate(e) {
+	function checkstate(/** @type {MouseEvent} */ e) {
 		const diffX = e.screenX - startX, diffY = e.screenY - startY;
 		const absX = Math.abs(diffX), absY = Math.abs(diffY);
 		const min = gestures.length ? vars.mm2 : vars.mm1;
@@ -418,7 +419,7 @@
 		}
 	}
 	
-	function onwheel(e) {
+	function onwheel(/** @type {WheelEvent} */ e) {
 		e.preventDefault();
 		if (startX < 0 || startY < 0) {
 			startX = e.screenX, startY = e.screenY;
@@ -430,7 +431,7 @@
 		}
 	}
 
-	function onmousedown(e) {
+	function onmousedown(/** @type {MouseEvent} */ e) {
 		gestures = [];
 		startX = e.screenX, startY = e.screenY;
 		if (e.button === 2) {
@@ -440,8 +441,9 @@
 			window.addEventListener('mouseup', e => {
 				overlay.hidden = true;
 				gesture.value = gestures.length ? gestures.map(v => browser.i18n.getMessage(v) || v).join('→') : browser.i18n.getMessage('rightclick');
-				gesture.parentElement.hidden = false;
-				gesture.parentElement.focus();
+				const _parent = /** @type {HTMLElement} */ (gesture.parentElement);
+				_parent.hidden = false;
+				_parent.focus();
 				window.removeEventListener('mousemove', checkstate);
 				window.removeEventListener('wheel', onwheel);
 			}, { once: true });

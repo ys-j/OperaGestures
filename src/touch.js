@@ -4,11 +4,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 (function() {
 	'use strict';
-	const EXT_URL = browser.runtime.getURL('/');
+	const _scripts = document.getElementsByTagName('script');
+	const [EXT_URL, PARAM_STR] = _scripts[_scripts.length - 1].src.split('touch.js?');
 	const ID_PREFIX = EXT_URL.replace(/[/:-]+/g, '-');
 
 	// get <meta name=viewport>
 	const viewport = {};
+	/** @type {?HTMLMetaElement} */
 	let meta = document.head.querySelector('meta[name="viewport"]');
 	if (meta) {
 		viewport.initial = meta.content || '';
@@ -16,8 +18,8 @@
 	} else {
 		const observer = new MutationObserver(records => {
 			loop:
-			for (let record of records) {
-				for (let node of record.addedNodes) {
+			for (const record of records) {
+				for (const node of Array.from(record.addedNodes)) {
 					if (node instanceof HTMLMetaElement && node.name === 'viewport') {
 						meta = node;
 						observer.disconnect();
@@ -42,30 +44,30 @@
 	let eventTarget = document.getElementById(ID_PREFIX + 'canvas') || top;
 
 	// load config
-	let wheelMoving = 32;
-	let minDelta = 4;
-	let duration = 200;
-	let margin = 32;
-	browser.storage.local.get(['config', 'touch']).then(v => {
-		if (v && v.config) {
-			wheelMoving = v.congig.mm1 || 32;
-			minDelta = v.config.wm || 4;
-		}
-		if (v && v.touch) {
-			duration = v.touch.duration || 200;
-			margin = v.touch.margin || 32;
-		}
+	/** @type { { [key:string]: number } } */
+	const vars = {
+		mm1: 4,
+		wm: 32,
+		duration: 200,
+		margin: 32,
+	};
+	PARAM_STR.split('&').forEach(p => {
+		const [k, v] = p.split('=');
+		vars[k] = parseInt(v);
 	});
 
 	// main
-	let timer;
+	let timer = 0;
 	let counter = 0;
-	let tapCoord = [], tap2Coord = new Map();
-	const inRange = (x, y) => {
+	/** @type {number[]} */ 
+	let tapCoord = [];
+	/** @type {Map<number, number[]>} */
+	let tap2Coord = new Map();
+	const inRange = (/** @type {number} */ x, /** @type {number} */ y) => {
 		let tx = tapCoord[0], ty = tapCoord[1];
-		return tx && ty && (tx - margin <= x && x <= tx + margin) && (ty - margin <= y && y <= ty + margin);
+		return tx && ty && (tx - vars.margin <= x && x <= tx + vars.margin) && (ty - vars.margin <= y && y <= ty + vars.margin);
 	};
-	const isSingleTap = touch => {
+	const isSingleTap = (/** @type {Touch} */ touch) => {
 		let x = touch.pageX, y = touch.pageY;
 		let rx = touch.radiusX, ry = touch.radiusY;
 		let tx = tapCoord[0], ty = tapCoord[1];
@@ -75,7 +77,7 @@
 	top.addEventListener('touchend', touchEnd, { passive: false });
 	top.addEventListener('touchcancel', touchCancel, { passive: true });
 
-	function touchStart(e) {
+	function touchStart(/** @type {TouchEvent} */ e) {
 		if (e.touches.length === 1) {
 			const touch = e.touches[0];
 			const x = touch.pageX, y = touch.pageY;
@@ -106,7 +108,7 @@
 			arguments[0].click();
 		}
 	}
-	function touchEnd(e) {
+	function touchEnd(/** @type {TouchEvent} */ e) {
 		if (!e.touches.length) {
 			const aElem = document.activeElement;
 			if (counter === 1
@@ -115,13 +117,14 @@
 				&& !(aElem instanceof HTMLMediaElement && aElem.controls)
 			) {
 				e.preventDefault();
-				document.getSelection().removeAllRanges();
+				const _selection = document.getSelection();
+				if (_selection) _selection.removeAllRanges();
 			}
 			if (isSingleTap(e.changedTouches[0])) {
-				e.target.focus();
-				timer = setTimeout(resetCount, duration, e.target);
+				/** @type {HTMLElement} */ (e.target).focus();
+				timer = setTimeout(resetCount, vars.duration, e.target);
 			} else {
-				timer = setTimeout(resetCount, duration);
+				timer = setTimeout(resetCount, vars.duration);
 			}
 		}
 	}
@@ -133,11 +136,11 @@
 			eventTarget.dispatchEvent(new MouseEvent('mouseleave'));
 		}
 	}
-	function dispatchMouseDown2(touch) {
+	function dispatchMouseDown2(/** @type {Touch} */ touch) {
 		// set viewport
-		meta.content = viewport.fixed;
-
-		const closest = touch.target.closest('a[href],area[href]');
+		/** @type {HTMLMetaElement} */ (meta).content = viewport.fixed;
+		/** @type {?HTMLAnchorElement|HTMLAreaElement} */
+		const closest = /** @type {HTMLElement} */ (touch.target).closest('a[href],area[href]');
 		top.postMessage({
 			button: 2,
 			href: closest ? closest.href : null,
@@ -154,7 +157,7 @@
 			}));
 		}
 	}
-	function dispatchMouseMove2(e) {
+	function dispatchMouseMove2(/** @type {TouchEvent} */ e) {
 		const touch = e.changedTouches[0];
 		eventTarget.dispatchEvent(new MouseEvent('mousemove', {
 			bubbles: true,
@@ -164,10 +167,10 @@
 			screenY: touch.screenY,
 		}));
 	}
-	function dispatchMouseUp2(e) {
+	function dispatchMouseUp2(/** @type {TouchEvent} */e) {
 		touchCancel();
 		// reset viewport
-		meta.content = viewport.initial;
+		/** @type {HTMLMetaElement} */(meta).content = viewport.initial;
 
 		const touch = e.changedTouches[0];
 		eventTarget.dispatchEvent(new MouseEvent('mouseup', {
@@ -177,25 +180,26 @@
 			screenY: touch.screenY,
 		}));
 	}
-	function dispatchWheel(e) {
-		let touches;
+	function dispatchWheel(/** @type {TouchEvent} */ e) {
+		/** @type {Touch[]} */
+		let touches = [];
 		if (e.touches.length === 1 && e.changedTouches.length === 1) {
 			touches = [e.touches[0], e.changedTouches[0]];
-		} else if (e.touches.length === 0 && e.changedTouches === 2) {
+		} else if (e.touches.length === 0 && e.changedTouches.length === 2) {
 			touches = Array.from(e.changedTouches);
 		}
-		if (touches) {
-			const startCoords = touches.map(t => tap2Coord.get(t.identifier));
+		if (touches.length) {
+			const startCoords = touches.map(t => /** @type {number[]} */ (tap2Coord.get(t.identifier)));
 			const diffYs = touches.map((t, i) => startCoords[i][1] - t.screenY);
 			const absDiffYs = diffYs.map(Math.abs);
-			const maxAbs = Math.max.apply(null, absDiffYs);
-			const minAbs = Math.min.apply(null, absDiffYs);
+			const maxAbs = Math.max(...absDiffYs);
+			const minAbs = Math.min(...absDiffYs);
 			const diff2 = diffYs[0] - diffYs[1];
-			if (minAbs >= wheelMoving && maxAbs - minAbs < margin) {
+			if (minAbs >= vars.wm && maxAbs - minAbs < vars.margin) {
 				const direction = Math.sign(diff2);
 				top.dispatchEvent(new WheelEvent('wheel', {
 					deltaX: 0,
-					deltaY: minDelta * direction,
+					deltaY: vars.mm1 * direction,
 					screenX: touches[0].screenX,
 					screenY: touches[0].screenY,
 				}));
